@@ -42,13 +42,16 @@ def get_lzo_packages():
   elif OSCheck.is_ubuntu_family():
     lzo_packages += ["liblzo2-2"]
 
-  if OSCheck.is_ubuntu_family():
-    lzo_packages += [script_instance.format_package_name("hadooplzo-${stack_version}") ,
-                     script_instance.format_package_name("hadooplzo-${stack_version}-native")]
-  else:
-    lzo_packages += [script_instance.format_package_name("hadooplzo_${stack_version}"),
-                     script_instance.format_package_name("hadooplzo_${stack_version}-native")]
-    
+
+  stack_version_unformatted = stack_features.get_stack_feature_version(Script.get_config()) # only used to check stack_feature, NOT as package version!
+  if stack_version_unformatted and check_stack_feature(StackFeature.ROLLING_UPGRADE, stack_version_unformatted):
+    if OSCheck.is_ubuntu_family():
+      lzo_packages += [script_instance.format_package_name("hadooplzo-${stack_version}") ,
+                       script_instance.format_package_name("hadooplzo-${stack_version}-native")]
+    else:
+      lzo_packages += [script_instance.format_package_name("hadooplzo_${stack_version}"),
+                       script_instance.format_package_name("hadooplzo_${stack_version}-native")]
+
   return lzo_packages
 
 def should_install_lzo():
@@ -56,21 +59,16 @@ def should_install_lzo():
   Return true if lzo is enabled via core-site.xml and GPL license (required for lzo) is accepted.
   """
   config = Script.get_config()
-  stack_version_unformatted = stack_features.get_stack_feature_version(config)
-  if check_stack_feature(StackFeature.LZO, stack_version_unformatted):
-    io_compression_codecs = default("/configurations/core-site/io.compression.codecs", None)
-    lzo_enabled = io_compression_codecs is not None and "com.hadoop.compression.lzo" in io_compression_codecs.lower()
+  io_compression_codecs = default("/configurations/core-site/io.compression.codecs", None)
+  lzo_enabled = io_compression_codecs is not None and "com.hadoop.compression.lzo" in io_compression_codecs.lower()
 
-    if not lzo_enabled:
-      return False
+  if not lzo_enabled:
+    return False
 
-    is_gpl_license_accepted = default("/hostLevelParams/gpl_license_accepted", False)
-    if not is_gpl_license_accepted:
-      Logger.warning(INSTALLING_LZO_WITHOUT_GPL)
-      return False
-  else:
-    Logger.info("This stack does not indicate that it supports LZO installation.")
-    return False # No LZO support
+  is_gpl_license_accepted = default("/hostLevelParams/gpl_license_accepted", False)
+  if not is_gpl_license_accepted:
+    Logger.warning(INSTALLING_LZO_WITHOUT_GPL)
+    return False
 
   return True
 
