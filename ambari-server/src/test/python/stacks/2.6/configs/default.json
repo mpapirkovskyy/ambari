@@ -358,7 +358,9 @@
             "zeppelin.interpreter.connect.timeout": "30000", 
             "zeppelin.notebook.s3.bucket": "zeppelin", 
             "zeppelin.notebook.homescreen.hide": "false", 
-            "zeppelin.server.allowed.origins": "*"
+            "zeppelin.server.allowed.origins": "*",
+            "zeppelin.server.kerberos.keytab": "",
+            "zeppelin.server.kerberos.principal": ""
         },
     "zoo.cfg": {
       "clientPort": "2181"
