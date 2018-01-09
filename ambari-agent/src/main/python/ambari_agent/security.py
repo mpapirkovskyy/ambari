@@ -48,8 +48,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
 
   def connect(self):
     self.two_way_ssl_required = self.config.isTwoWaySSLConnection(self.host)
-    logger.debug("Server two-way SSL authentication required: %s" % str(
-      self.two_way_ssl_required))
+    logger.debug("Server two-way SSL authentication required: %s", self.two_way_ssl_required)
     if self.two_way_ssl_required is True:
       logger.info(
         'Server require two-way SSL authentication. Use it instead of one-way...')
@@ -228,7 +227,8 @@ class CertificateManager():
     f.close()
     try:
       data = json.loads(response)
-      logger.debug("Sign response from Server: \n" + pprint.pformat(data))
+      if logger.isEnabledFor(logging.DEBUG):
+        logger.debug("Sign response from Server:\n%s", pprint.pformat(data))
     except Exception:
       logger.warn("Malformed response! data: " + str(data))
       data = {'result': 'ERROR'}

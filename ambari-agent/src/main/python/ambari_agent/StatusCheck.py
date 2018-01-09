@@ -35,7 +35,7 @@ class StatusCheck:
 
   def listFiles(self, dir):
     basedir = dir
-    logger.debug("Files in " + os.path.abspath(dir) + ": ")
+    logger.debug("Files in %s: ", os.path.abspath(dir))
     subdirlist = []
     try:
       if os.path.isdir(dir):
@@ -91,10 +91,10 @@ class StatusCheck:
           logger.error('There is no linux user mapping for component: ' + service)
 
     if StatusCheck.firstInit:
-      logger.info('Service to pid dictionary: ' + str(self.serToPidDict))
+      logger.info('Service to pid dictionary: %s', self.serToPidDict)
       StatusCheck.firstInit = False
     else:
-      logger.debug('Service to pid dictionary: ' + str(self.serToPidDict))
+      logger.debug('Service to pid dictionary: %s', self.serToPidDict)
 
   def getIsLive(self, pidPath):
 
@@ -122,7 +122,7 @@ class StatusCheck:
     try:
       pidPath = None
       pidPattern = self.serToPidDict[serviceCode]
-      logger.debug('pidPattern: ' + pidPattern)
+      logger.debug('pidPattern: %s', pidPattern)
     except KeyError as e:
       logger.warn('There is no mapping for ' + serviceCode)
       return None
@@ -130,7 +130,7 @@ class StatusCheck:
       for pidFile in self.pidFilesDict.keys():
         if re.match(pidPattern, pidFile):
           pidPath = self.pidFilesDict[pidFile]          
-      logger.debug('pidPath: ' + str(pidPath))
+      logger.debug('pidPath: %s', pidPath)
       result = self.getIsLive(pidPath)
       return result
     except KeyError:
