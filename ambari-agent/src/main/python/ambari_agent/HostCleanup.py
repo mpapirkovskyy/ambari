@@ -425,7 +425,7 @@ class HostCleanup:
     for folder in folders:
       for filename in os.listdir(folder):
         fileToCheck = os.path.join(folder, filename)
-        stat = os.lstat(fileToCheck)
+        stat = os.stat(fileToCheck)
         if stat.st_uid in userIds:
           self.do_erase_dir_silent([fileToCheck])
           logger.info("Deleting file/folder: " + fileToCheck)
