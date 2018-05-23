@@ -3480,6 +3480,7 @@ describe('App.MainAdminStackAndUpgradeController', function() {
       App.Service.find.restore();
       App.StackService.find.restore();
       App.RepositoryVersion.find.restore();
+      App.router.get.restore();
       controller.set('serviceVersionsMap', {});
     });
 
@@ -3489,6 +3490,7 @@ describe('App.MainAdminStackAndUpgradeController', function() {
         sinon.stub(App.Service, 'find').returns(item.services);
         sinon.stub(App.StackService, 'find').returns(item.stackServices);
         sinon.stub(App.RepositoryVersion, 'find').returns(item.repoVersions);
+        sinon.stub(App.router, 'get').returns(true);
         controller.getServiceVersionFromRepo();
         expect(controller.get('serviceVersionsMap')).to.be.eql(item.expected);
       });

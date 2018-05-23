@@ -63,6 +63,8 @@ App.ClusterController = Em.Controller.extend(App.ReloadPopupMixin, {
 
   isServiceContentFullyLoaded: Em.computed.and('isServiceMetricsLoaded', 'isComponentsStateLoaded', 'isComponentsConfigLoaded'),
 
+  isStackVersionsLoaded: false,
+
   clusterName: Em.computed.alias('App.clusterName'),
 
   updateLoadStatus: function (item) {
@@ -302,6 +304,7 @@ App.ClusterController = Em.Controller.extend(App.ReloadPopupMixin, {
    * TODO should be called even if recent background operations doesn't have Upgrade request
    */
   restoreUpgradeState: function () {
+    var self = this;
     return this.getAllUpgrades().done(function (data) {
       var upgradeController = App.router.get('mainAdminStackAndUpgradeController');
       var lastUpgradeData = data.items.sortProperty('Upgrade.request_id').pop();
@@ -326,6 +329,7 @@ App.ClusterController = Em.Controller.extend(App.ReloadPopupMixin, {
         upgradeController.loadCompatibleVersions();
         upgradeController.updateCurrentStackVersion();
         App.set('stackVersionsAvailable', App.StackVersion.find().content.length > 0);
+        self.set('isStackVersionsLoaded', true);
       });
     });
   },
