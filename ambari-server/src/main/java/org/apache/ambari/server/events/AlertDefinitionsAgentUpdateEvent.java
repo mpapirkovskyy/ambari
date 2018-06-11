@@ -18,9 +18,12 @@
 
 package org.apache.ambari.server.events;
 
+import java.beans.Transient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ambari.server.agent.stomp.dto.AlertCluster;
 import org.apache.ambari.server.agent.stomp.dto.Hashable;
@@ -40,6 +43,8 @@ public class AlertDefinitionsAgentUpdateEvent extends STOMPHostEvent implements 
   private final Long hostId;
   private String hash;
 
+  protected Lock identifiersLock = new ReentrantLock();
+
   public static AlertDefinitionsAgentUpdateEvent emptyEvent() {
     return new AlertDefinitionsAgentUpdateEvent(null, null, null, null);
   }
@@ -54,13 +59,31 @@ public class AlertDefinitionsAgentUpdateEvent extends STOMPHostEvent implements 
 
   @Override
   public String getHash() {
-    return hash;
+    try {
+      identifiersLock.lock();
+      return hash;
+    } finally {
+      identifiersLock.unlock();
+    }
   }
 
   @Override
   @JsonProperty("hash")
   public void setHash(String hash) {
     this.hash = hash;
+  }
+
+  @Transient
+  public Lock getIdentifiersLock() {
+    return identifiersLock;
+  }
+
+  public void lock() {
+    identifiersLock.lock();
+  }
+
+  public void unlock() {
+    identifiersLock.unlock();
   }
 
   @JsonProperty("hostName")

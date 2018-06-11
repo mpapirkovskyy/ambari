@@ -18,8 +18,11 @@
 
 package org.apache.ambari.server.events;
 
+import java.beans.Transient;
 import java.util.Objects;
 import java.util.SortedMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ambari.server.agent.stomp.dto.ClusterConfigs;
 import org.apache.ambari.server.agent.stomp.dto.Hashable;
@@ -52,6 +55,8 @@ public class AgentConfigsUpdateEvent extends STOMPHostEvent implements Hashable 
   @JsonProperty("clusters")
   private final SortedMap<String, ClusterConfigs> clustersConfigs;
 
+  protected Lock identifiersLock = new ReentrantLock();
+
   public AgentConfigsUpdateEvent(SortedMap<String, ClusterConfigs> clustersConfigs) {
     super(Type.AGENT_CONFIGS);
     this.clustersConfigs = clustersConfigs;
@@ -60,7 +65,12 @@ public class AgentConfigsUpdateEvent extends STOMPHostEvent implements Hashable 
 
   @Override
   public String getHash() {
-    return hash;
+    try {
+      identifiersLock.lock();
+      return hash;
+    } finally {
+      identifiersLock.unlock();
+    }
   }
 
   public void setHash(String hash) {
@@ -68,11 +78,29 @@ public class AgentConfigsUpdateEvent extends STOMPHostEvent implements Hashable 
   }
 
   public Long getTimestamp() {
-    return timestamp;
+    try {
+      identifiersLock.lock();
+      return timestamp;
+    } finally {
+      identifiersLock.unlock();
+    }
   }
 
   public void setTimestamp(Long timestamp) {
     this.timestamp = timestamp;
+  }
+
+  @Transient
+  public Lock getIdentifiersLock() {
+    return identifiersLock;
+  }
+
+  public void lock() {
+    identifiersLock.lock();
+  }
+
+  public void unlock() {
+    identifiersLock.unlock();
   }
 
   public void setHostId(Long hostId) {

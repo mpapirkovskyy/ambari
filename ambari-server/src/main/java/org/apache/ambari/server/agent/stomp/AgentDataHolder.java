@@ -37,8 +37,13 @@ public abstract class AgentDataHolder<T extends Hashable> {
   protected abstract T getEmptyData();
 
   protected void regenerateDataIdentifiers(T data) {
-    data.setHash(null);
-    data.setHash(getHash(data));
+    try {
+      data.lock();
+      data.setHash(null);
+      data.setHash(getHash(data));
+    } finally {
+      data.unlock();
+    }
   }
 
   protected boolean isIdentifierValid(T data) {

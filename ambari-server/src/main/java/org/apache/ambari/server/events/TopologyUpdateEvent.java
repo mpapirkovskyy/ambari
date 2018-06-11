@@ -17,10 +17,13 @@
  */
 package org.apache.ambari.server.events;
 
+import java.beans.Transient;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ambari.server.agent.stomp.dto.Hashable;
 import org.apache.ambari.server.agent.stomp.dto.TopologyCluster;
@@ -45,6 +48,8 @@ public class TopologyUpdateEvent extends STOMPEvent implements Hashable {
    * Actual version hash.
    */
   private String hash;
+
+  protected Lock identifiersLock = new ReentrantLock();
 
   /**
    * Type of update, is used to differ full current topology (CREATE), adding new or update existing topology
@@ -82,11 +87,29 @@ public class TopologyUpdateEvent extends STOMPEvent implements Hashable {
   }
 
   public String getHash() {
-    return hash;
+    try {
+      identifiersLock.lock();
+      return hash;
+    } finally {
+      identifiersLock.unlock();
+    }
   }
 
   public void setHash(String hash) {
     this.hash = hash;
+  }
+
+  @Transient
+  public Lock getIdentifiersLock() {
+    return identifiersLock;
+  }
+
+  public void lock() {
+    identifiersLock.lock();
+  }
+
+  public void unlock() {
+    identifiersLock.unlock();
   }
 
   public static TopologyUpdateEvent emptyUpdate() {

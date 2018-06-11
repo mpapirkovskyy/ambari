@@ -17,9 +17,12 @@
  */
 package org.apache.ambari.server.events;
 
+import java.beans.Transient;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ambari.server.agent.stomp.dto.Hashable;
 import org.apache.ambari.server.agent.stomp.dto.HostLevelParamsCluster;
@@ -50,6 +53,8 @@ public class HostLevelParamsUpdateEvent extends STOMPHostEvent implements Hashab
   @JsonProperty("clusters")
   private final Map<String, HostLevelParamsCluster> hostLevelParamsClusters;
 
+  protected Lock identifiersLock = new ReentrantLock();
+
   public HostLevelParamsUpdateEvent(Map<String, HostLevelParamsCluster> hostLevelParamsClusters) {
     super(Type.HOSTLEVELPARAMS);
     this.hostLevelParamsClusters = hostLevelParamsClusters;
@@ -61,12 +66,32 @@ public class HostLevelParamsUpdateEvent extends STOMPHostEvent implements Hashab
 
   @Override
   public String getHash() {
-    return hash;
+    try {
+      identifiersLock.lock();
+      return hash;
+    } finally {
+      identifiersLock.unlock();
+    }
   }
 
   @Override
   public void setHash(String hash) {
     this.hash = hash;
+  }
+
+  @Transient
+  public Lock getIdentifiersLock() {
+    return identifiersLock;
+  }
+
+  @Override
+  public void lock() {
+    identifiersLock.lock();
+  }
+
+  @Override
+  public void unlock() {
+    identifiersLock.unlock();
   }
 
   public static HostLevelParamsUpdateEvent emptyUpdate() {

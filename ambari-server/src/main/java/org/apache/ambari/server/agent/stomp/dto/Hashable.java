@@ -24,4 +24,6 @@ package org.apache.ambari.server.agent.stomp.dto;
 public interface Hashable {
   String getHash();
   void setHash(String hash);
+  void lock();
+  void unlock();
 }

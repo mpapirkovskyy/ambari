@@ -17,8 +17,11 @@
  */
 package org.apache.ambari.server.events;
 
+import java.beans.Transient;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.ambari.server.agent.stomp.dto.Hashable;
 import org.apache.ambari.server.agent.stomp.dto.MetadataCluster;
@@ -50,6 +53,8 @@ public class MetadataUpdateEvent extends STOMPEvent implements Hashable {
   @JsonProperty("clusters")
   private final SortedMap<String, MetadataCluster> metadataClusters;
 
+  protected Lock identifiersLock = new ReentrantLock();
+
   private MetadataUpdateEvent() {
     super(Type.METADATA);
     metadataClusters = null;
@@ -74,12 +79,30 @@ public class MetadataUpdateEvent extends STOMPEvent implements Hashable {
 
   @Override
   public String getHash() {
-    return hash;
+    try {
+      lock();
+      return hash;
+    } finally {
+      unlock();
+    }
   }
 
   @Override
   public void setHash(String hash) {
     this.hash = hash;
+  }
+
+  @Transient
+  public Lock getIdentifiersLock() {
+    return identifiersLock;
+  }
+
+  public void lock() {
+    identifiersLock.lock();
+  }
+
+  public void unlock() {
+    identifiersLock.unlock();
   }
 
   public UpdateEventType getEventType() {
