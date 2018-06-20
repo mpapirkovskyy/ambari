@@ -107,6 +107,10 @@ def is_host_skippable(stack_selector_path, formatted_version):
     Logger.info("{0} has no stack versions installed".format(socket.gethostname()))
     return True
 
+  if not formatted_version in out:
+    Logger.info("{0} is not found in the list of versions {1}".format(formatted_version, out))
+    return True
+
   return False
 
 
