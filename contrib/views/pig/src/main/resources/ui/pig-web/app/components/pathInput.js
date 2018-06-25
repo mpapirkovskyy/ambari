@@ -29,7 +29,7 @@ App.PathInputComponent = Em.TextField.extend({
   typeaheadSource:function (query,process) {
 
     var adapter = this.store.adapterFor(App.File),
-        url = adapter.buildURL(true, query.replace(/[^/]+$/,''));
+        url = adapter.buildURL() + "/resources/file/" + encodeURIComponent(query);
 
     adapter.ajax(url, 'GET', {data:{action:'ls'}}).then(function (data) {
 

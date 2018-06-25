@@ -710,7 +710,7 @@ App.ChartView = Ember.View.extend({
           this.set('titleClass', this.get('titleId').replace(popupSuffix, ''));
         },
 
-        templateName: require('templates/common/chart/linear_time'),
+        //templateName: require('common/chart/linear_time'),
         /**
          * check is time paging feature is enable for graph
          */

@@ -86,13 +86,15 @@ public class FileService extends BaseService {
    * Get single item
    */
   @GET
-  @Path("{filePath:.*}")
+  @Path("{filePath: .+}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getFile(@PathParam("filePath") String filePath,
                           @QueryParam("page") Long page,
                           @QueryParam("action") String action) throws IOException, InterruptedException {
     try {
+      LOG.debug("filePath : {}", filePath);
       filePath = sanitizeFilePath(filePath);
+
       if (action != null && action.equals("ls")) {
         LOG.debug("List directory {}", filePath);
         List<String> ls = new LinkedList<String>();
@@ -138,10 +140,10 @@ public class FileService extends BaseService {
    * Delete single item
    */
   @DELETE
-  @Path("{filePath:.*}")
+  @Path("{filePath:.+}")
   public Response deleteFile(@PathParam("filePath") String filePath) throws IOException, InterruptedException {
     try {
-
+      LOG.debug("filePath : {}", filePath);
       filePath = sanitizeFilePath(filePath);
 
       LOG.info("Deleting file {}", filePath);
@@ -162,13 +164,13 @@ public class FileService extends BaseService {
    * Update item
    */
   @PUT
-  @Path("{filePath:.*}")
+  @Path("{filePath:.+}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateFile(FileResourceRequest request,
                              @PathParam("filePath") String filePath) throws IOException, InterruptedException {
     try {
+      LOG.debug("put filePath : {}", filePath);
       filePath = sanitizeFilePath(filePath);
-      LOG.info("Rewriting file {}", filePath);
       FSDataOutputStream output = getHdfsApi().create(filePath, true);
       output.write(request.file.getFileContent().getBytes("UTF-8"));
       output.close();
