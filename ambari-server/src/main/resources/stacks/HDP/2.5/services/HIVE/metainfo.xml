@@ -230,6 +230,7 @@
         </osSpecific>
       </osSpecifics>
       <configuration-dependencies>
+        <config-type>core-site</config-type>
         <config-type>application-properties</config-type>
         <config-type>hive-atlas-application.properties</config-type>
       </configuration-dependencies>
