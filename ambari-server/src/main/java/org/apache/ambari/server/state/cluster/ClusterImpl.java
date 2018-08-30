@@ -1309,7 +1309,7 @@ public class ClusterImpl implements Cluster {
   }
 
   @Override
-  public void deleteService(String serviceName, DeleteHostComponentStatusMetaData deleteMetaData)
+  public void deleteService(String serviceName, DeleteHostComponentStatusMetaData deleteMetaData, boolean postFinalSTOMPUpdate)
     throws AmbariException {
     clusterGlobalLock.writeLock().lock();
     try {
@@ -1329,6 +1329,16 @@ public class ClusterImpl implements Cluster {
     } finally {
       clusterGlobalLock.writeLock().unlock();
     }
+    STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
+    if (postFinalSTOMPUpdate) {
+      STOMPComponentsDeleteHandler.processDeleteByMetaData(deleteMetaData);
+    }
+  }
+
+  @Override
+  public void deleteService(String serviceName, DeleteHostComponentStatusMetaData deleteMetaData)
+    throws AmbariException {
+    deleteService(serviceName, deleteMetaData, true);
   }
 
   /**

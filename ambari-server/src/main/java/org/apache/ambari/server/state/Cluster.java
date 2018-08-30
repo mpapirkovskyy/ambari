@@ -439,6 +439,13 @@ public interface Cluster {
    * @param serviceName
    * @throws AmbariException
    */
+  void deleteService(String serviceName, DeleteHostComponentStatusMetaData deleteMetaData, boolean postFinalSTOMPUpdate) throws AmbariException;
+
+  /**
+   * Delete the named service associated with this cluster
+   * @param serviceName
+   * @throws AmbariException
+   */
   void deleteService(String serviceName, DeleteHostComponentStatusMetaData deleteMetaData) throws AmbariException;
 
   /**

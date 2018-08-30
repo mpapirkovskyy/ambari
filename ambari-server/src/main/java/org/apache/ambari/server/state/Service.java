@@ -71,6 +71,9 @@ public interface Service {
 
   void deleteAllComponents(DeleteHostComponentStatusMetaData deleteMetaData);
 
+  void deleteServiceComponent(String componentName, DeleteHostComponentStatusMetaData deleteMetaData, boolean postFinalSTOMPUpdate)
+      throws AmbariException;
+
   void deleteServiceComponent(String componentName, DeleteHostComponentStatusMetaData deleteMetaData)
       throws AmbariException;
 

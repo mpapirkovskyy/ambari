@@ -62,6 +62,7 @@ import org.apache.ambari.server.orm.entities.ServiceDesiredStateEntity;
 import org.apache.ambari.server.orm.entities.ServiceDesiredStateEntityPK;
 import org.apache.ambari.server.orm.entities.StackEntity;
 import org.apache.ambari.server.serveraction.kerberos.Component;
+import org.apache.ambari.server.topology.STOMPComponentsDeleteHandler;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +104,9 @@ public class ServiceImpl implements Service {
 
   @Inject
   private AmbariServerSSOConfigurationHandler ambariServerConfigurationHandler;
+
+  @Inject
+  private STOMPComponentsDeleteHandler STOMPComponentsDeleteHandler;
 
   private final ClusterServiceDAO clusterServiceDAO;
   private final ServiceDesiredStateDAO serviceDesiredStateDAO;
@@ -631,7 +635,8 @@ public class ServiceImpl implements Service {
   }
 
   @Override
-  public void deleteServiceComponent(String componentName, DeleteHostComponentStatusMetaData deleteMetaData)
+  public void deleteServiceComponent(String componentName, DeleteHostComponentStatusMetaData deleteMetaData,
+                                     boolean postFinalSTOMPUpdate)
       throws AmbariException {
     lock.lock();
     try {
@@ -651,6 +656,16 @@ public class ServiceImpl implements Service {
     } finally {
       lock.unlock();
     }
+    STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
+    if (postFinalSTOMPUpdate) {
+      STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
+    }
+  }
+
+  @Override
+  public void deleteServiceComponent(String componentName, DeleteHostComponentStatusMetaData deleteMetaData)
+      throws AmbariException {
+    deleteServiceComponent(componentName, deleteMetaData, true);
   }
 
   @Override

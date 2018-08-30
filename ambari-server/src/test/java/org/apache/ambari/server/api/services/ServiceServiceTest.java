@@ -75,7 +75,7 @@ public class ServiceServiceTest extends BaseServiceTest {
     args = new Object[] {"body", getHttpHeaders(), getUriInfo()};
     listInvocations.add(new ServiceTestInvocation(Request.Type.PUT, service, m, args, "body"));
 
-    //deleteServices
+    //deleteServicesSTOMPEventFiring
     service = new TestServiceService("clusterName", "serviceName");
     m = service.getClass().getMethod("deleteService", HttpHeaders.class, UriInfo.class, String.class);
     args = new Object[] {getHttpHeaders(), getUriInfo(), "serviceName"};

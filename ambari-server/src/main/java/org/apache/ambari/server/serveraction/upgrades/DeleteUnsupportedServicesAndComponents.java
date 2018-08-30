@@ -85,8 +85,6 @@ public class DeleteUnsupportedServicesAndComponents extends AbstractUpgradeServe
     for (String serviceName : servicesToBeRemoved) {
       DeleteHostComponentStatusMetaData deleteMetaData = new DeleteHostComponentStatusMetaData();
       cluster.deleteService(serviceName, deleteMetaData);
-      STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
-      STOMPComponentsDeleteHandler.processDeleteByMetaData(deleteMetaData);
       deleteUpgradeHistory(cluster, history -> serviceName.equals(history.getServiceName()));
     }
     return servicesToBeRemoved;
@@ -97,8 +95,6 @@ public class DeleteUnsupportedServicesAndComponents extends AbstractUpgradeServe
     for (ServiceComponent component : serviceComponentSupport.unsupportedComponents(cluster, repoVersion.getStackName(), repoVersion.getStackVersion())) {
       DeleteHostComponentStatusMetaData deleteMetaData = new DeleteHostComponentStatusMetaData();
       cluster.getService(component.getServiceName()).deleteServiceComponent(component.getName(), deleteMetaData);
-      STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
-      STOMPComponentsDeleteHandler.processDeleteByMetaData(deleteMetaData);
       deleteUpgradeHistory(cluster, history -> component.getName().equals(history.getComponentName()));
       deletedComponents.add(component.getName());
     }

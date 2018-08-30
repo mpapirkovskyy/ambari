@@ -558,6 +558,7 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
     Map<String, Map<String, Map<String, Set<String>>>> hostComponentNames =
         new HashMap<>();
     Set<String> duplicates = new HashSet<>();
+    Set<Long> uniqueHostId = new HashSet<>();
     for (ServiceComponentHostRequest request : requests) {
       validateServiceComponentHostRequest(request);
 
@@ -636,6 +637,7 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
       Host host;
       try {
         host = clusters.getHost(request.getHostname());
+        uniqueHostId.add(host.getHostId());
       } catch (HostNotFoundException e) {
         throw new ParentObjectNotFoundException(
             "Attempted to add a host_component to a host that doesn't exist: ", e);
@@ -703,6 +705,9 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
     // now doing actual work
     persistServiceComponentHosts(requests);
     m_topologyHolder.get().updateData(getAddedComponentsTopologyEvent(requests));
+    for (Long hostId : uniqueHostId) {
+      m_hostLevelParamsHolder.get().updateData(m_hostLevelParamsHolder.get().getCurrentData(hostId));
+    }
   }
 
   void persistServiceComponentHosts(Set<ServiceComponentHostRequest> requests)
@@ -1553,27 +1558,40 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
   }
 
   @Override
-  @Transactional
   public synchronized RequestStatusResponse updateClusters(Set<ClusterRequest> requests,
                                                            Map<String, String> requestProperties)
       throws AmbariException, AuthorizationException {
     return updateClusters(requests, requestProperties, true);
+
   }
 
   @Override
-  @Transactional
   public synchronized RequestStatusResponse updateClusters(Set<ClusterRequest> requests,
                                                            Map<String, String> requestProperties,
                                                            boolean fireAgentUpdates)
       throws AmbariException, AuthorizationException {
+    RequestStatusResponseWrapper wrapper = updateClustersInternal(requests, requestProperties, fireAgentUpdates);
+    if (StringUtils.isNotEmpty(wrapper.getClusterName())) {
+      configHelper.updateAgentConfigs(Collections.singleton(wrapper.getClusterName()));
+    }
 
-    RequestStatusResponse response = null;
+    return wrapper.getResponse();
+  }
+
+  @Transactional
+  protected synchronized RequestStatusResponseWrapper updateClustersInternal(Set<ClusterRequest> requests,
+                                                                             Map<String, String> requestProperties,
+                                                                             boolean fireAgentUpdates)
+      throws AmbariException, AuthorizationException {
+
+    RequestStatusResponseWrapper response = null;
 
     // We have to allow for multiple requests to account for multiple
     // configuration updates (create multiple configuration resources)...
     for (ClusterRequest request : requests) {
       response = updateCluster(request, requestProperties, fireAgentUpdates);
     }
+
     return response;
   }
 
@@ -1671,7 +1689,7 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
     return output;
   }
 
-  private synchronized RequestStatusResponse updateCluster(ClusterRequest request,
+  private synchronized RequestStatusResponseWrapper updateCluster(ClusterRequest request,
                                                            Map<String, String> requestProperties,
                                                            boolean fireAgentUpdates
   )
@@ -2025,15 +2043,16 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
         }
       }
     }
-    if (fireAgentUpdates && (serviceConfigVersionResponse != null || nonServiceConfigsChanged)) {
-      configHelper.updateAgentConfigs(Collections.singleton(cluster.getClusterName()));
-    }
 
     if (requestStageContainer != null) {
       requestStageContainer.persist();
-      return requestStageContainer.getRequestStatusResponse();
+      if (fireAgentUpdates && (serviceConfigVersionResponse != null || nonServiceConfigsChanged)) {
+        return new RequestStatusResponseWrapper(requestStageContainer.getRequestStatusResponse(), cluster.getClusterName());
+      } else {
+        return new RequestStatusResponseWrapper(requestStageContainer.getRequestStatusResponse(), null);
+      }
     } else {
-      return null;
+      return new RequestStatusResponseWrapper(null, null);
     }
   }
 

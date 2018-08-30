@@ -799,8 +799,7 @@ public class ComponentResourceProvider extends AbstractControllerResourceProvide
         deleteHostComponentsForServiceComponent(sc, request, deleteMetaData);
         STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
         sc.setDesiredState(State.DISABLED);
-        s.deleteServiceComponent(request.getComponentName(), deleteMetaData);
-        STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
+        s.deleteServiceComponent(request.getComponentName(), deleteMetaData, false);
       }
     }
     STOMPComponentsDeleteHandler.processDeleteByMetaData(deleteMetaData);

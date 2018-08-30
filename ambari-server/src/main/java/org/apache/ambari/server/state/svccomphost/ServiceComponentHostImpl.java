@@ -963,8 +963,18 @@ public class ServiceComponentHostImpl implements ServiceComponentHost {
   }
 
   @Override
-  @Transactional
   public void setVersion(String version) throws AmbariException {
+    ServiceComponentHostRequest serviceComponentHostRequest = setVersionInternal(version);
+    if (serviceComponentHostRequest != null) {
+      TopologyUpdateEvent updateEvent = controller.get().getAddedComponentsTopologyEvent(
+          Collections.singleton(serviceComponentHostRequest));
+
+      m_topologyHolder.get().updateData(updateEvent);
+    }
+  }
+
+  @Transactional
+  public ServiceComponentHostRequest setVersionInternal(String version) throws AmbariException {
     HostComponentStateEntity stateEntity = getStateEntity();
     if (stateEntity != null) {
       stateEntity.setVersion(version);
@@ -974,15 +984,13 @@ public class ServiceComponentHostImpl implements ServiceComponentHost {
           serviceComponent.getClusterName(), serviceComponent.getServiceName(),
           serviceComponent.getName(), hostName, getDesiredState().name());
 
-      TopologyUpdateEvent updateEvent = controller.get().getAddedComponentsTopologyEvent(
-          Collections.singleton(serviceComponentHostRequest));
-
-      m_topologyHolder.get().updateData(updateEvent);
+      return serviceComponentHostRequest;
     } else {
       LOG.warn("Setting a member on an entity object that may have been "
           + "previously deleted, serviceName = " + getServiceName() + ", " + "componentName = "
           + getServiceComponentName() + ", " + "hostName = " + getHostName());
     }
+    return null;
   }
 
   /**

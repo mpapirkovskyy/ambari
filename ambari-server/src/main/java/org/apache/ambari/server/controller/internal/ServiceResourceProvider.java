@@ -975,8 +975,7 @@ public class ServiceResourceProvider extends AbstractControllerResourceProvider 
 
     DeleteHostComponentStatusMetaData deleteMetaData = new DeleteHostComponentStatusMetaData();
     for (Service service : removable) {
-      service.getCluster().deleteService(service.getName(), deleteMetaData);
-      STOMPComponentsDeleteHandler.processDeleteByMetaDataException(deleteMetaData);
+      service.getCluster().deleteService(service.getName(), deleteMetaData, false);
     }
     STOMPComponentsDeleteHandler.processDeleteByMetaData(deleteMetaData);
 
