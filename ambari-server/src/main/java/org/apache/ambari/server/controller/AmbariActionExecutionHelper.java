@@ -24,7 +24,9 @@ import static org.apache.ambari.server.agent.ExecutionCommand.KeyNames.COMMAND_T
 import static org.apache.ambari.server.agent.ExecutionCommand.KeyNames.COMPONENT_CATEGORY;
 import static org.apache.ambari.server.agent.ExecutionCommand.KeyNames.SCRIPT;
 import static org.apache.ambari.server.agent.ExecutionCommand.KeyNames.SCRIPT_TYPE;
+import static org.apache.ambari.server.agent.ExecutionCommand.KeyNames.STACK_NAME;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -436,6 +438,14 @@ public class AmbariActionExecutionHelper {
       if (null != actionParameters && !actionParameters.isEmpty()) {
         if (actionParameters.containsKey(KeyNames.REFRESH_CONFIG_TAGS_BEFORE_EXECUTION)) {
           execCmd.setForceRefreshConfigTagsBeforeExecution(true);
+        }
+        if (actionParameters.containsKey(KeyNames.OVERRIDE_STACK_NAME)) {
+          Map<String, String> clusterLevelParams = execCmd.getClusterLevelParams();
+          if (clusterLevelParams == null) {
+            clusterLevelParams = new HashMap<>();
+          }
+          clusterLevelParams.put(STACK_NAME, actionContext.getStackId().getStackName());
+          execCmd.setClusterLevelParams(clusterLevelParams);
         }
       }
 

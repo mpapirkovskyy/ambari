@@ -31,8 +31,7 @@ __all__ = ["RepositoryUtil", "CommandRepository"]
 UBUNTU_REPO_COMPONENTS_POSTFIX = "main"
 
 class RepositoryUtil:
-  def __init__(self, config, tags_to_skip):
-    self.tags_to_skip = tags_to_skip
+  def __init__(self, config):
 
     # repo templates
     repo_file = config['repositoryFile']
@@ -65,10 +64,6 @@ class RepositoryUtil:
       if repository.repo_id is None:
         raise Fail("Repository with url {0} has no id".format(repository.base_url))
 
-      if self.tags_to_skip & repository.tags:
-        Logger.info("Repository with url {0} is not created due to its tags: {1}".format(repository.base_url, repository.tags))
-        continue
-
       if not repository.ambari_managed:
         Logger.warning(
           "Repository for {0}/{1}/{2} is not managed by Ambari".format(
@@ -93,7 +88,7 @@ def create_repo_files(template, command_repository):
   Please use Script.repository_util.create_repo_files() instead.
   """
   from resource_management.libraries.script import Script
-  return RepositoryUtil(Script.get_config(), set()).create_repo_files()
+  return RepositoryUtil(Script.get_config()).create_repo_files()
 
 def _find_value(dictionary, key, default=None):
   """
@@ -138,6 +133,7 @@ class CommandRepository(object):
     self.version_string = _find_value(json_dict, 'repoVersion')
     self.repo_filename = _find_value(json_dict, 'repoFileName')
     self.feat = CommandRepositoryFeature(_find_value(json_dict, "feature", default={}))
+    self.all_items = []
     self.items = []
 
     repos_def = _find_value(json_dict, 'repositories')
@@ -146,7 +142,19 @@ class CommandRepository(object):
          repos_def = [repos_def]
 
        for repo_def in repos_def:
-         self.items.append(CommandRepositoryItem(self, repo_def))
+         self.all_items.append(CommandRepositoryItem(self, repo_def))
+
+    from resource_management.libraries.functions import lzo_utils
+
+    # remove repos with 'GPL' tag when GPL license is not approved
+    self.repo_tags_to_skip = set()
+    if not lzo_utils.is_gpl_license_accepted():
+      self.repo_tags_to_skip.add("GPL")
+    for r in self.all_items:
+      if self.repo_tags_to_skip & r.tags:
+        Logger.info("Repository with url {0} is not created due to its tags: {1}".format(r.base_url, r.tags))
+      else:
+        self.items.append(r)
 
 
 class CommandRepositoryItem(object):

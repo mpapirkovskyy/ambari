@@ -88,6 +88,9 @@ public class ExecutionCommand extends AgentCommand {
   @JsonIgnore
   private Map<String, String> hostLevelParams = new HashMap<>();
 
+  @SerializedName("clusterLevelParams")
+  private Map<String, String> clusterLevelParams = new HashMap<>();
+
   @SerializedName("roleParams")
   @com.fasterxml.jackson.annotation.JsonProperty("roleParams")
   private Map<String, String> roleParams = null;
@@ -101,15 +104,12 @@ public class ExecutionCommand extends AgentCommand {
     new HashMap<>();
 
   @SerializedName("configurations")
-  @JsonIgnore
   private Map<String, Map<String, String>> configurations;
 
   @SerializedName("configurationAttributes")
-  @JsonIgnore
   private Map<String, Map<String, Map<String, String>>> configurationAttributes;
 
   @SerializedName("configurationTags")
-  @JsonIgnore
   private Map<String, Map<String, String>> configurationTags;
 
   @SerializedName("forceRefreshConfigTagsBeforeExecution")
@@ -310,6 +310,14 @@ public class ExecutionCommand extends AgentCommand {
 
   public void setHostLevelParams(Map<String, String> params) {
     hostLevelParams = params;
+  }
+
+  public Map<String, String> getClusterLevelParams() {
+    return clusterLevelParams;
+  }
+
+  public void setClusterLevelParams(Map<String, String> clusterLevelParams) {
+    this.clusterLevelParams = clusterLevelParams;
   }
 
   public Map<String, Set<String>> getClusterHostInfo() {
@@ -566,6 +574,7 @@ public class ExecutionCommand extends AgentCommand {
      * before sending the command.
      */
     String REFRESH_CONFIG_TAGS_BEFORE_EXECUTION = "forceRefreshConfigTagsBeforeExecution";
+    String OVERRIDE_STACK_NAME = "overrideStackName";
 
     String SERVICE_CHECK = "SERVICE_CHECK"; // TODO: is it standard command? maybe add it to RoleCommand enum?
     String CUSTOM_COMMAND = "custom_command";
