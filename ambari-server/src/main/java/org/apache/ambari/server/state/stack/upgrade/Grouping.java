@@ -39,7 +39,7 @@ import org.apache.ambari.server.state.stack.UpgradePack.ProcessingComponent;
 import org.apache.ambari.server.utils.SetUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 /**
  *
@@ -421,6 +421,6 @@ public class Grouping {
    */
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", name).toString();
+    return MoreObjects.toStringHelper(this).add("name", name).toString();
   }
 }
