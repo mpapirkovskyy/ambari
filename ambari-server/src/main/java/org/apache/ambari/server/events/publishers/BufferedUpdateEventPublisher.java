@@ -70,6 +70,9 @@ public abstract class BufferedUpdateEventPublisher<T> {
       while (!buffer.isEmpty()) {
         bufferContent.add(buffer.poll());
       }
+      if (!bufferContent.isEmpty()) {
+        released.set(false);
+      }
     }
     return bufferContent;
   }
@@ -94,7 +97,6 @@ public abstract class BufferedUpdateEventPublisher<T> {
       if (events.isEmpty()) {
         return;
       }
-      released.set(false);
       mergeBufferAndPost(events, m_eventBus);
       released.set(true);
     }
