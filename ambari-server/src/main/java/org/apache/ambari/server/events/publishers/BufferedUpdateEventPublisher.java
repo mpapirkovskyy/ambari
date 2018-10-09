@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Singleton;
@@ -33,61 +32,40 @@ import com.google.inject.Singleton;
 public abstract class BufferedUpdateEventPublisher<T> {
 
   private static final long TIMEOUT = 1000L;
-
-  /**
-   * Means new merge task should be scheduled when set to false,
-   * otherwise all events will be processed in the current task scope.
-   */
-  private final AtomicBoolean collecting = new AtomicBoolean(false);
-
-  /**
-   * Means previous merging already completed (true) or not (false).
-   * I used to avoid merge tasks collection when merging requires more time than TIMEOUT between tasks.
-   */
-  private final AtomicBoolean released = new AtomicBoolean(true);
   private final ConcurrentLinkedQueue<T> buffer = new ConcurrentLinkedQueue<>();
-  private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+
+  private ScheduledExecutorService scheduledExecutorService =
+      Executors.newScheduledThreadPool(1);
 
   public void publish(T event, EventBus m_eventBus) {
-    if (collecting.get()) {
-      buffer.add(event);
-    } else {
-      buffer.add(event);
-      collecting.set(true);
-      scheduledExecutorService.schedule(getScheduledPublisher(m_eventBus),
-          TIMEOUT, TimeUnit.MILLISECONDS);
+    if (scheduledExecutorService == null) {
+      scheduledExecutorService =
+          Executors.newScheduledThreadPool(1);
+      scheduledExecutorService
+          .scheduleWithFixedDelay(getScheduledPublisher(m_eventBus), TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
     }
+    buffer.add(event);
   }
 
-  protected ReleasableRunnable getScheduledPublisher(EventBus m_eventBus) {
-    return new ReleasableRunnable(m_eventBus);
+  protected MergingRunnable getScheduledPublisher(EventBus m_eventBus) {
+    return new MergingRunnable(m_eventBus);
   }
 
-  protected synchronized List<T> retrieveBuffer() {
-    resetCollecting();
+  protected List<T> retrieveBuffer() {
     List<T> bufferContent = new ArrayList<>();
-    if (released.get()) {
-      while (!buffer.isEmpty()) {
-        bufferContent.add(buffer.poll());
-      }
-      if (!bufferContent.isEmpty()) {
-        released.set(false);
-      }
+    while (!buffer.isEmpty()) {
+      bufferContent.add(buffer.poll());
     }
     return bufferContent;
   }
 
-  protected void resetCollecting() {
-    collecting.set(false);
-  }
-
   public abstract void mergeBufferAndPost(List<T> events, EventBus m_eventBus);
 
-  private class ReleasableRunnable implements Runnable {
+  private class MergingRunnable implements Runnable {
 
     private final EventBus m_eventBus;
 
-    public ReleasableRunnable(EventBus m_eventBus) {
+    public MergingRunnable(EventBus m_eventBus) {
       this.m_eventBus = m_eventBus;
     }
 
@@ -98,7 +76,6 @@ public abstract class BufferedUpdateEventPublisher<T> {
         return;
       }
       mergeBufferAndPost(events, m_eventBus);
-      released.set(true);
     }
   }
 }

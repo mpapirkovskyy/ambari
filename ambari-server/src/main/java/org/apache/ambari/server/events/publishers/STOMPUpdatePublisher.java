@@ -45,7 +45,7 @@ public class STOMPUpdatePublisher {
 
   public STOMPUpdatePublisher() {
     m_eventBus = new AsyncEventBus("ambari-update-bus",
-      Executors.newSingleThreadExecutor());
+        Executors.newSingleThreadExecutor());
   }
 
   public void publish(STOMPEvent event) {
