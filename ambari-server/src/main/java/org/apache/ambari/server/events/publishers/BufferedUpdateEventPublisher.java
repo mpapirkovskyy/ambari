@@ -34,8 +34,7 @@ public abstract class BufferedUpdateEventPublisher<T> {
   private static final long TIMEOUT = 1000L;
   private final ConcurrentLinkedQueue<T> buffer = new ConcurrentLinkedQueue<>();
 
-  private ScheduledExecutorService scheduledExecutorService =
-      Executors.newScheduledThreadPool(1);
+  private ScheduledExecutorService scheduledExecutorService;
 
   public void publish(T event, EventBus m_eventBus) {
     if (scheduledExecutorService == null) {
