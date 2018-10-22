@@ -62,11 +62,16 @@ public class STOMPUpdatePublisher {
   }
 
   public void publish(STOMPEvent event) {
+    boolean processed = false;
     if (DefaultMessageEmitter.DEFAULT_AGENT_EVENT_TYPES.contains(event.getType())) {
       publishAgent(event);
-    } else if (DefaultMessageEmitter.DEFAULT_API_EVENT_TYPES.contains(event.getType())) {
+      processed = true;
+    }
+    if (DefaultMessageEmitter.DEFAULT_API_EVENT_TYPES.contains(event.getType())) {
       publishAPI(event);
-    } else {
+      processed = true;
+    }
+    if (!processed) {
       // TODO need better solution
       throw new AmbariRuntimeException("Event with type {" + event.getType() + "} can not be published.");
     }

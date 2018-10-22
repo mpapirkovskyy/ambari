@@ -38,13 +38,11 @@ import org.apache.ambari.server.state.AgentVersion;
 import org.apache.ambari.server.state.Cluster;
 import org.apache.ambari.server.state.Clusters;
 import org.apache.ambari.server.state.ComponentInfo;
-import org.apache.ambari.server.state.ConfigHelper;
 import org.apache.ambari.server.state.Host;
 import org.apache.ambari.server.state.HostState;
 import org.apache.ambari.server.state.ServiceComponent;
 import org.apache.ambari.server.state.ServiceComponentHost;
 import org.apache.ambari.server.state.StackId;
-import org.apache.ambari.server.state.alert.AlertDefinitionHash;
 import org.apache.ambari.server.state.alert.AlertHelper;
 import org.apache.ambari.server.state.fsm.InvalidStateTransitionException;
 import org.apache.ambari.server.state.host.HostHealthyHeartbeatEvent;
@@ -82,15 +80,6 @@ public class HeartBeatHandler {
 
   @Inject
   private AmbariMetaInfo ambariMetaInfo;
-
-  @Inject
-  private ConfigHelper configHelper;
-
-  @Inject
-  private AlertDefinitionHash alertDefinitionHash;
-
-  @Inject
-  private RecoveryConfigHelper recoveryConfigHelper;
 
   @Inject
   private STOMPUpdatePublisher STOMPUpdatePublisher;
