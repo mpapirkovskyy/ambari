@@ -28,6 +28,7 @@ import org.apache.ambari.server.agent.HostInfo;
 import org.apache.ambari.server.agent.RecoveryReport;
 import org.apache.ambari.server.controller.HostResponse;
 import org.apache.ambari.server.orm.entities.HostEntity;
+import org.apache.ambari.server.orm.entities.HostStateEntity;
 import org.apache.ambari.server.orm.entities.HostVersionEntity;
 import org.apache.ambari.server.orm.entities.RepositoryVersionEntity;
 import org.apache.ambari.server.state.fsm.InvalidStateTransitionException;
@@ -175,6 +176,7 @@ public interface Host extends Comparable {
    * @return the osFamily
    */
   String getOsFamily();
+  String getOsFamily(Map<String, String> hostAttributes);
 
   String getOSFamilyFromHostAttributes(Map<String, String> hostAttributes);
 
@@ -198,6 +200,7 @@ public interface Host extends Comparable {
    * @return the healthStatus
    */
   HostHealthStatus getHealthStatus();
+  HostHealthStatus getHealthStatus(HostStateEntity hostStateEntity);
 
   /**
    * Get detailed recovery report for the host
@@ -221,6 +224,7 @@ public interface Host extends Comparable {
    * @return the hostAttributes
    */
   Map<String, String> getHostAttributes();
+  Map<String, String> getHostAttributes(HostEntity hostEntity);
 
   /**
    * @param hostAttributes the hostAttributes to set
@@ -288,6 +292,7 @@ public interface Host extends Comparable {
    * @return the agentVersion
    */
   AgentVersion getAgentVersion();
+  AgentVersion getAgentVersion(HostStateEntity hostStateEntity);
 
   /**
    * @param agentVersion the agentVersion to set

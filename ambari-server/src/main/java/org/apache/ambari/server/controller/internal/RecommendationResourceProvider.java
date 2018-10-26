@@ -18,11 +18,8 @@
 
 package org.apache.ambari.server.controller.internal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,8 +28,6 @@ import org.apache.ambari.server.api.services.stackadvisor.StackAdvisorException;
 import org.apache.ambari.server.api.services.stackadvisor.StackAdvisorRequest;
 import org.apache.ambari.server.api.services.stackadvisor.StackAdvisorRequestException;
 import org.apache.ambari.server.api.services.stackadvisor.recommendations.RecommendationResponse;
-import org.apache.ambari.server.api.services.stackadvisor.recommendations.RecommendationResponse.BindingHostGroup;
-import org.apache.ambari.server.api.services.stackadvisor.recommendations.RecommendationResponse.HostGroup;
 import org.apache.ambari.server.controller.AmbariManagementController;
 import org.apache.ambari.server.controller.spi.NoSuchParentResourceException;
 import org.apache.ambari.server.controller.spi.Request;
@@ -156,20 +151,20 @@ public class RecommendationResourceProvider extends StackAdvisorResourceProvider
       public Resource invoke() throws AmbariException {
 
         Resource resource = new ResourceImpl(Resource.Type.Recommendation);
-        setResourceProperty(resource, RECOMMENDATION_ID_PROPERTY_ID, response.getId(), getPropertyIds());
+        /*setResourceProperty(resource, RECOMMENDATION_ID_PROPERTY_ID, response.getId(), getPropertyIds());
         setResourceProperty(resource, STACK_NAME_PROPERTY_ID, response.getVersion().getStackName(),
             getPropertyIds());
         setResourceProperty(resource, STACK_VERSION_PROPERTY_ID, response.getVersion()
             .getStackVersion(), getPropertyIds());
         setResourceProperty(resource, HOSTS_PROPERTY_ID, response.getHosts(), getPropertyIds());
         setResourceProperty(resource, SERVICES_PROPERTY_ID, response.getServices(),
-            getPropertyIds());
+            getPropertyIds());*/
         setResourceProperty(resource, CONFIG_GROUPS_PROPERTY_ID,
           response.getRecommendations().getConfigGroups(), getPropertyIds());
         setResourceProperty(resource, BLUEPRINT_CONFIGURATIONS_PROPERTY_ID, response
             .getRecommendations().getBlueprint().getConfigurations(), getPropertyIds());
 
-        Set<HostGroup> hostGroups = response.getRecommendations().getBlueprint().getHostGroups();
+        /*Set<HostGroup> hostGroups = response.getRecommendations().getBlueprint().getHostGroups();
         List<Map<String, Object>> listGroupProps = new ArrayList<>();
         for (HostGroup hostGroup : hostGroups) {
           Map<String, Object> mapGroupProps = new HashMap<>();
@@ -191,7 +186,7 @@ public class RecommendationResourceProvider extends StackAdvisorResourceProvider
           listBindingGroupProps.add(mapGroupProps);
         }
         setResourceProperty(resource, BINDING_HOST_GROUPS_PROPERTY_ID, listBindingGroupProps,
-            getPropertyIds());
+            getPropertyIds());*/
 
         return resource;
       }

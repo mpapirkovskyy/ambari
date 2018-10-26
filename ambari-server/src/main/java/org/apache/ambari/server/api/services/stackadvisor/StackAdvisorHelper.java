@@ -20,6 +20,8 @@ package org.apache.ambari.server.api.services.stackadvisor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.api.services.AmbariMetaInfo;
@@ -38,6 +40,7 @@ import org.apache.ambari.server.controller.internal.AmbariServerConfigurationHan
 import org.apache.ambari.server.state.ServiceInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.JsonNode;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,6 +61,8 @@ public class StackAdvisorHelper {
   /* Monotonically increasing requestid */
   private int requestId = 0;
   private StackAdvisorRunner saRunner;
+
+  private Map<String, JsonNode> hostInfoCache = new ConcurrentHashMap<>();
 
   @Inject
   public StackAdvisorHelper(Configuration conf, StackAdvisorRunner saRunner,
@@ -145,13 +150,13 @@ public class StackAdvisorHelper {
           requestId, saRunner, metaInfo, ambariServerConfigurationHandler);
     } else if (requestType == StackAdvisorRequestType.CONFIGURATIONS) {
       command = new ConfigurationRecommendationCommand(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS, recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
-          requestId, saRunner, metaInfo, ambariServerConfigurationHandler);
+          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
     } else if (requestType == StackAdvisorRequestType.SSO_CONFIGURATIONS) {
       command = new ConfigurationRecommendationCommand(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS_FOR_SSO, recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
-          requestId, saRunner, metaInfo, ambariServerConfigurationHandler);
+          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
     } else if (requestType == StackAdvisorRequestType.KERBEROS_CONFIGURATIONS) {
       command = new ConfigurationRecommendationCommand(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS_FOR_KERBEROS, recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
-          requestId, saRunner, metaInfo, ambariServerConfigurationHandler);
+          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
     } else if (requestType == StackAdvisorRequestType.CONFIGURATION_DEPENDENCIES) {
       command = new ConfigurationDependenciesRecommendationCommand(recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
           requestId, saRunner, metaInfo, ambariServerConfigurationHandler);

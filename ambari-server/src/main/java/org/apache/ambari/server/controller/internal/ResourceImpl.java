@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.ambari.server.controller.spi.Resource;
 import org.apache.ambari.server.controller.utilities.PropertyHelper;
@@ -40,8 +41,7 @@ public class ResourceImpl implements Resource {
   /**
    * The map of property maps keyed by property category.
    */
-  private final Map<String, Map<String, Object>> propertiesMap =
-      Collections.synchronizedMap(new TreeMap<String, Map<String, Object>>());
+  private final Map<String, Map<String, Object>> propertiesMap = new ConcurrentHashMap<>();
 
   // ----- Constructors ------------------------------------------------------
 
