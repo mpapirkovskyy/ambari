@@ -103,6 +103,7 @@ public class TopologyCluster {
       if (!isPresent && eventType.equals(UpdateEventType.UPDATE)) {
         getTopologyHosts().add(hostToUpdate);
         report.mappingWasChanged();
+        report.addHostName(hostToUpdate.getHostName());
       }
     }
   }

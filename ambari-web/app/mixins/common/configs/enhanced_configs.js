@@ -265,7 +265,7 @@ App.EnhancedConfigsMixin = Em.Mixin.create(App.ConfigWithOverrideRecommendationP
    * @param stepConfigs
    */
   addRecommendationRequestParams: function(recommendations, dataToSend, stepConfigs) {
-    recommendations.blueprint.configurations = blueprintUtils.buildConfigsJSON(stepConfigs);
+    //recommendations.blueprint.configurations = blueprintUtils.buildConfigsJSON(stepConfigs);
     dataToSend.recommendations = recommendations;
     dataToSend.serviceName = this.get('content.serviceName');
     dataToSend.clusterId = App.get('clusterId');
@@ -398,8 +398,8 @@ App.EnhancedConfigsMixin = Em.Mixin.create(App.ConfigWithOverrideRecommendationP
       }
     });
     return {
-      configurations: [configurations],
-      hosts: hosts,
+      //configurations: [configurations],
+      //hosts: hosts,
       group_id: Number(configGroup.get('id'))
     }
   },
