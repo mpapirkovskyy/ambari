@@ -44,9 +44,8 @@ public class TopologyCluster {
     this.topologyHosts = topologyHosts;
   }
 
-  public boolean update(Set<TopologyComponent> componentsToUpdate, Set<TopologyHost> hostsToUpdate,
-                     UpdateEventType eventType) {
-    boolean changed = false;
+  public void update(Set<TopologyComponent> componentsToUpdate, Set<TopologyHost> hostsToUpdate,
+                     UpdateEventType eventType, TopologyUpdateHandlingReport report) {
     for (TopologyComponent componentToUpdate : componentsToUpdate) {
       boolean isPresent = false;
       for (Iterator<TopologyComponent> iter = getTopologyComponents().iterator(); iter.hasNext() && !isPresent; ) {
@@ -55,19 +54,31 @@ public class TopologyCluster {
           if (eventType.equals(UpdateEventType.DELETE)) {
             if (SetUtils.isEqualSet(existsComponent.getHostIds(), componentToUpdate.getHostIds())) {
               iter.remove();
-              changed = true;
+              report.mappingWasChanged();
+              report.addHostsNames(componentToUpdate.getHostNames());
             } else {
-              changed |= existsComponent.removeComponent(componentToUpdate);
+              if (existsComponent.removeComponent(componentToUpdate)) {
+                report.mappingWasChanged();
+                report.addHostsNames(componentToUpdate.getHostNames());
+              }
             }
           } else {
-            changed |= existsComponent.updateComponent(componentToUpdate);
+            if (existsComponent.updateComponent(componentToUpdate)) {
+              report.mappingWasChanged();
+
+              // calc changed hosts
+              Set<String> namesToUpdate = new HashSet<>(componentToUpdate.getHostNames());
+              namesToUpdate.removeAll(existsComponent.getHostNames());
+              report.addHostsNames(namesToUpdate);
+            }
           }
           isPresent = true;
         }
       }
       if (!isPresent && eventType.equals(UpdateEventType.UPDATE)) {
         getTopologyComponents().add(componentToUpdate);
-        changed = true;
+        report.mappingWasChanged();
+        report.addHostsNames(componentToUpdate.getHostNames());
       }
     }
     for (TopologyHost hostToUpdate : hostsToUpdate) {
@@ -77,19 +88,23 @@ public class TopologyCluster {
         if (existsHost.equals(hostToUpdate)) {
           if (eventType.equals(UpdateEventType.DELETE)) {
             iter.remove();
-            changed = true;
+            report.mappingWasChanged();
+            report.addHostName(existsHost.getHostName());
           } else {
-            changed |= existsHost.updateHost(hostToUpdate);
+            if (existsHost.updateHost(hostToUpdate)) {
+              report.mappingWasChanged();
+              report.addHostName(existsHost.getHostName());
+              report.addHostName(hostToUpdate.getHostName());
+            }
           }
           isPresent = true;
         }
       }
       if (!isPresent && eventType.equals(UpdateEventType.UPDATE)) {
         getTopologyHosts().add(hostToUpdate);
-        changed = true;
+        report.mappingWasChanged();
       }
     }
-    return changed;
   }
 
   public Set<TopologyComponent> getTopologyComponents() {

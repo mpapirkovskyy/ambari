@@ -56,6 +56,9 @@ public class RecommendationResourceProvider extends StackAdvisorResourceProvider
   protected static final String RECOMMENDATION_ID_PROPERTY_ID = PropertyHelper.getPropertyId(
       "Recommendation", "id");
 
+  protected static final String CLUSTER_ID_PROPERTY_ID = "clusterId";
+  protected static final String SERVICE_NAME_PROPERTY_ID = "serviceName";
+  protected static final String AUTO_COMPLETE_PROPERTY_ID = "autoComplete";
   protected static final String HOSTS_PROPERTY_ID = "hosts";
   protected static final String SERVICES_PROPERTY_ID = "services";
   protected static final String RECOMMEND_PROPERTY_ID = "recommend";
@@ -105,6 +108,9 @@ public class RecommendationResourceProvider extends StackAdvisorResourceProvider
       STACK_NAME_PROPERTY_ID,
       STACK_VERSION_PROPERTY_ID,
       RECOMMEND_PROPERTY_ID,
+      CLUSTER_ID_PROPERTY_ID,
+      SERVICE_NAME_PROPERTY_ID,
+      AUTO_COMPLETE_PROPERTY_ID,
       HOSTS_PROPERTY_ID,
       SERVICES_PROPERTY_ID,
       CONFIG_GROUPS_PROPERTY_ID,
@@ -146,7 +152,7 @@ public class RecommendationResourceProvider extends StackAdvisorResourceProvider
     } catch (StackAdvisorRequestException e) {
       LOG.warn("Error occured during recommendation", e);
       throw new IllegalArgumentException(e.getMessage(), e);
-    } catch (StackAdvisorException e) {
+    } catch (StackAdvisorException | AmbariException e) {
       LOG.warn("Error occured during recommendation", e);
       throw new SystemException(e.getMessage(), e);
     }
