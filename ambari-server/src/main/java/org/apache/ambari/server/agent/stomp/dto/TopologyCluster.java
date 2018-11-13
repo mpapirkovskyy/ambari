@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.ambari.server.NullHostNameException;
 import org.apache.ambari.server.events.UpdateEventType;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.SetUtils;
@@ -45,7 +46,7 @@ public class TopologyCluster {
   }
 
   public void update(Set<TopologyComponent> componentsToUpdate, Set<TopologyHost> hostsToUpdate,
-                     UpdateEventType eventType, TopologyUpdateHandlingReport report) {
+                     UpdateEventType eventType, TopologyUpdateHandlingReport report) throws NullHostNameException {
     for (TopologyComponent componentToUpdate : componentsToUpdate) {
       boolean isPresent = false;
       for (Iterator<TopologyComponent> iter = getTopologyComponents().iterator(); iter.hasNext() && !isPresent; ) {
@@ -63,12 +64,13 @@ public class TopologyCluster {
               }
             }
           } else {
+            Set<String> preExistNames = new HashSet<>(existsComponent.getHostNames());
             if (existsComponent.updateComponent(componentToUpdate)) {
               report.mappingWasChanged();
 
               // calc changed hosts
               Set<String> namesToUpdate = new HashSet<>(componentToUpdate.getHostNames());
-              namesToUpdate.removeAll(existsComponent.getHostNames());
+              namesToUpdate.removeAll(preExistNames);
               report.addHostsNames(namesToUpdate);
             }
           }

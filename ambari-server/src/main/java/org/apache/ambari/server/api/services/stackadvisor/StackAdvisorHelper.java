@@ -62,6 +62,7 @@ public class StackAdvisorHelper {
   public static String pythonStackAdvisorScript;
   private final AmbariMetaInfo metaInfo;
   private final AmbariServerConfigurationHandler ambariServerConfigurationHandler;
+  private final Gson gson;
 
   /* Monotonically increasing requestid */
   private int requestId = 0;
@@ -70,12 +71,10 @@ public class StackAdvisorHelper {
   private Map<String, JsonNode> hostInfoCache = new ConcurrentHashMap<>();
   private Map<String, RecommendationResponse> configsRecommendationResponse = new ConcurrentHashMap<>();
 
-  @Inject
-  private Gson gson;
 
   @Inject
-  public StackAdvisorHelper(Configuration conf, StackAdvisorRunner saRunner,
-                            AmbariMetaInfo metaInfo, AmbariServerConfigurationHandler ambariServerConfigurationHandler) throws IOException {
+  public StackAdvisorHelper(Configuration conf, StackAdvisorRunner saRunner, AmbariMetaInfo metaInfo,
+                            AmbariServerConfigurationHandler ambariServerConfigurationHandler, Gson gson) throws IOException {
     this.recommendationsDir = conf.getRecommendationsDir();
     this.recommendationsArtifactsLifetime = conf.getRecommendationsArtifactsLifetime();
     this.recommendationsArtifactsRolloverMax = conf.getRecommendationsArtifactsRolloverMax();
@@ -84,6 +83,7 @@ public class StackAdvisorHelper {
     this.saRunner = saRunner;
     this.metaInfo = metaInfo;
     this.ambariServerConfigurationHandler = ambariServerConfigurationHandler;
+    this.gson = gson;
   }
 
   /**

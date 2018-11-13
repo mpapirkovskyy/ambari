@@ -62,7 +62,7 @@ public class HostUpdateListener {
   private Provider<Clusters> m_clusters;
 
   @Inject
-  private StackAdvisorHelper stackAdvisorHelper;
+  private Provider<StackAdvisorHelper> stackAdvisorHelperProvider;
 
   @Inject
   public HostUpdateListener(AmbariEventPublisher ambariEventPublisher, AlertEventPublisher m_alertEventPublisher) {
@@ -92,7 +92,7 @@ public class HostUpdateListener {
           hostUpdateEvent.getHostName(),
           hostUpdateEvent.getHostStatus(),
           hostUpdateEvent.getLastHeartbeatTime()));
-      stackAdvisorHelper.clearCaches(hostName);
+      stackAdvisorHelperProvider.get().clearCaches(hostName);
     }
   }
 
@@ -119,7 +119,7 @@ public class HostUpdateListener {
           hostUpdateEvent.getHostState(),
           hostUpdateEvent.getLastHeartbeatTime()));
     }
-    stackAdvisorHelper.clearCaches(hostName);
+    stackAdvisorHelperProvider.get().clearCaches(hostName);
   }
 
   @Subscribe
@@ -177,7 +177,7 @@ public class HostUpdateListener {
         STOMPUpdatePublisher.publish(HostUpdateEvent.createHostAlertsUpdate(hostUpdateEvent.getClusterName(),
             hostName, summary));
       }
-      stackAdvisorHelper.clearCaches(hostName);
+      stackAdvisorHelperProvider.get().clearCaches(hostName);
     } else if (event.getService()!= null) {
       String serviceName = event.getService().getName();
       for (String hostName : m_clusters.get().getCluster(clusterId).getService(serviceName).getServiceHosts()) {
@@ -192,7 +192,7 @@ public class HostUpdateListener {
 
         STOMPUpdatePublisher.publish(HostUpdateEvent.createHostAlertsUpdate(hostUpdateEvent.getClusterName(),
             hostName, summary));
-        stackAdvisorHelper.clearCaches(hostName);
+        stackAdvisorHelperProvider.get().clearCaches(hostName);
       }
     }
   }

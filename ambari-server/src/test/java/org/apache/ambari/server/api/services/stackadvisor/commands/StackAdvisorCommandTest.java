@@ -19,6 +19,12 @@
 package org.apache.ambari.server.api.services.stackadvisor.commands;
 
 import static java.util.Collections.emptyMap;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.partialMockBuilder;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -43,6 +49,7 @@ import java.util.Map;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.ambari.server.api.resources.ResourceInstance;
@@ -103,7 +110,7 @@ public class StackAdvisorCommandTest {
     AmbariMetaInfo metaInfo = mock(AmbariMetaInfo.class);
     doReturn(Collections.emptyList()).when(metaInfo).getStackParentVersions(anyString(), anyString());
     StackAdvisorCommand<TestResource> command = spy(new TestStackAdvisorCommand(recommendationsDir, recommendationsArtifactsLifetime,
-        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo));
+        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo, null));
 
     StackAdvisorRequest request = StackAdvisorRequestBuilder.forStack("stackName", "stackVersion")
         .build();
@@ -123,7 +130,7 @@ public class StackAdvisorCommandTest {
     AmbariMetaInfo metaInfo = mock(AmbariMetaInfo.class);
     doReturn(Collections.emptyList()).when(metaInfo).getStackParentVersions(anyString(), anyString());
     StackAdvisorCommand<TestResource> command = spy(new TestStackAdvisorCommand(recommendationsDir, recommendationsArtifactsLifetime,
-        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo));
+        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo, null));
 
     StackAdvisorRequest request = StackAdvisorRequestBuilder.forStack("stackName", "stackVersion")
         .build();
@@ -151,7 +158,7 @@ public class StackAdvisorCommandTest {
     AmbariMetaInfo metaInfo = mock(AmbariMetaInfo.class);
     doReturn(Collections.emptyList()).when(metaInfo).getStackParentVersions(anyString(), anyString());
     StackAdvisorCommand<TestResource> command = spy(new TestStackAdvisorCommand(recommendationsDir, recommendationsArtifactsLifetime,
-        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo));
+        ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo, null));
 
     StackAdvisorRequest request = StackAdvisorRequestBuilder.forStack("stackName", "stackVersion")
         .build();
@@ -180,7 +187,8 @@ public class StackAdvisorCommandTest {
     AmbariMetaInfo metaInfo = mock(AmbariMetaInfo.class);
     doReturn(Collections.emptyList()).when(metaInfo).getStackParentVersions(anyString(), anyString());
     final StackAdvisorCommand<TestResource> command = spy(new TestStackAdvisorCommand(
-        recommendationsDir, recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType.PYTHON, requestId, saRunner, metaInfo));
+        recommendationsDir, recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType.PYTHON, requestId,
+        saRunner, metaInfo, null));
 
     StackAdvisorRequest request = StackAdvisorRequestBuilder.forStack("stackName", "stackVersion")
         .build();
@@ -215,8 +223,8 @@ public class StackAdvisorCommandTest {
     String recommendationsArtifactsLifetime = "1w";
     StackAdvisorRunner stackAdvisorRunner = mock(StackAdvisorRunner.class);
     AmbariMetaInfo ambariMetaInfo = mock(AmbariMetaInfo.class);
-    StackAdvisorCommand<TestResource> cmd = new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType.PYTHON, 1,
-        stackAdvisorRunner, ambariMetaInfo);
+    StackAdvisorCommand<TestResource> cmd = new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime,
+        ServiceInfo.ServiceAdvisorType.PYTHON, 1, stackAdvisorRunner, ambariMetaInfo, null);
     ObjectNode objectNode = (ObjectNode) cmd.mapper.readTree("{\"Versions\": " +
         "{\"stack_name\": \"stack\", \"stack_version\":\"1.0.0\"}}");
 
@@ -244,7 +252,7 @@ public class StackAdvisorCommandTest {
     StackAdvisorRunner stackAdvisorRunner = mock(StackAdvisorRunner.class);
     AmbariMetaInfo ambariMetaInfo = mock(AmbariMetaInfo.class);
     StackAdvisorCommand<TestResource> cmd = new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType.PYTHON, 1,
-      stackAdvisorRunner, ambariMetaInfo);
+      stackAdvisorRunner, ambariMetaInfo, null);
     ObjectNode objectNode = (ObjectNode) cmd.mapper.readTree("{\"Versions\": " +
       "{\"stack_name\": \"stack\", \"stack_version\":\"1.0.0\"}}");
 
@@ -266,7 +274,7 @@ public class StackAdvisorCommandTest {
     StackAdvisorRunner stackAdvisorRunner = mock(StackAdvisorRunner.class);
     AmbariMetaInfo ambariMetaInfo = mock(AmbariMetaInfo.class);
     StackAdvisorCommand<TestResource> cmd = new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType.PYTHON, 1,
-        stackAdvisorRunner, ambariMetaInfo);
+        stackAdvisorRunner, ambariMetaInfo, null);
     ObjectNode objectNode = (ObjectNode) cmd.mapper.readTree("{\"Versions\": " +
         "{\"stack_name\": \"stack\", \"stack_version\":\"1.0.0\"}}");
 
@@ -294,7 +302,7 @@ public class StackAdvisorCommandTest {
       ServiceInfo.ServiceAdvisorType.PYTHON,
       0,
       mock(StackAdvisorRunner.class),
-      mock(AmbariMetaInfo.class));
+      mock(AmbariMetaInfo.class), null);
     when(ambariServerConfigurationHandler.getConfigurations()).thenReturn(storedConfig);
     JsonNode servicesRootNode = json("{}");
     command.populateAmbariConfiguration((ObjectNode)servicesRootNode);
@@ -310,12 +318,50 @@ public class StackAdvisorCommandTest {
       ServiceInfo.ServiceAdvisorType.PYTHON,
       0,
       mock(StackAdvisorRunner.class),
-      mock(AmbariMetaInfo.class));
+      mock(AmbariMetaInfo.class), null);
     when(ambariServerConfigurationHandler.getConfigurations()).thenReturn(emptyMap());
     JsonNode servicesRootNode = json("{}");
     command.populateAmbariConfiguration((ObjectNode)servicesRootNode);
     JsonNode expectedLdapConfig = json("{\"ambari-server-configuration\":{}}");
     assertEquals(expectedLdapConfig, servicesRootNode);
+  }
+
+  @Test
+  //TODO not completed
+  public void testHostInfoCaching() throws StackAdvisorException {
+    Map<String, JsonNode> hostInfoCache = new HashMap<>();
+    /*TestStackAdvisorCommand command = partialMockBuilder(TestStackAdvisorCommand.class)
+        .withConstructor(StackAdvisorCommandType.class, File.class, String.class, ServiceInfo.ServiceAdvisorType.class,
+            Integer.class, StackAdvisorRunner.class, AmbariMetaInfo.class, AmbariServerConfigurationHandler.class,
+            Map.class)
+        .withArgs(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS, temp.newFolder("recommendationDir"), "1w",
+            ServiceInfo.ServiceAdvisorType.PYTHON, 1, createNiceMock(StackAdvisorRunner.class),
+            createNiceMock(AmbariMetaInfo.class), createNiceMock(AmbariServerConfigurationHandler.class), hostInfoCache)
+        .addMockedMethod("handleRequest", HttpHeaders.class, String.class, UriInfo.class, Request.Type.class,
+            ResourceInstance.class)
+        .createMock();*/
+    TestStackAdvisorCommand command = partialMockBuilder(TestStackAdvisorCommand.class)
+        .withConstructor(File.class, String.class, ServiceInfo.ServiceAdvisorType.class,
+            Integer.class, StackAdvisorRunner.class, AmbariMetaInfo.class,
+            Map.class)
+        .withArgs(temp.newFolder("recommendationDir"), "1w",
+            ServiceInfo.ServiceAdvisorType.PYTHON, 1, createNiceMock(StackAdvisorRunner.class),
+            createNiceMock(AmbariMetaInfo.class), createNiceMock(AmbariServerConfigurationHandler.class), hostInfoCache)
+        .addMockedMethod("handleRequest", HttpHeaders.class, String.class, UriInfo.class, Request.Type.class,
+            ResourceInstance.class)
+        .createMock();
+    expect(command.handleRequest(anyObject(), anyObject(), anyObject(), anyObject(), anyObject(), anyObject()))
+        .andReturn(Response.status(200).build());
+
+    replay(command);
+
+    StackAdvisorRequest request = StackAdvisorRequestBuilder.
+        forStack(null, null).ofType(StackAdvisorRequest.StackAdvisorRequestType.CONFIGURATIONS).
+        forHosts(Arrays.asList(new String[]{"hostname1", "hostName2"})).
+        build();
+    command.getHostsInformation(request);
+
+    verify(command);
   }
 
   private static String jsonString(Object obj) throws IOException {
@@ -345,8 +391,9 @@ public class StackAdvisorCommandTest {
 
   class TestStackAdvisorCommand extends StackAdvisorCommand<TestResource> {
     public TestStackAdvisorCommand(File recommendationsDir, String recommendationsArtifactsLifetime, ServiceInfo.ServiceAdvisorType serviceAdvisorType,
-                                   int requestId, StackAdvisorRunner saRunner, AmbariMetaInfo metaInfo) {
-      super(recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType, requestId, saRunner, metaInfo, ambariServerConfigurationHandler);
+                                   int requestId, StackAdvisorRunner saRunner, AmbariMetaInfo metaInfo, Map<String, JsonNode> hostInfoCache) {
+      super(recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType, requestId, saRunner, metaInfo,
+          ambariServerConfigurationHandler, hostInfoCache);
     }
 
     @Override

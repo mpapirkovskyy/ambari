@@ -223,7 +223,7 @@ App.EnhancedConfigsMixin = Em.Mixin.create(App.ConfigWithOverrideRecommendationP
     var requiredTags = [];
 
     if (updateDependencies || Em.isNone(this.get('recommendationsConfigs'))) {
-      var recommendations = this.get('hostGroups');
+      var recommendations = {};//this.get('hostGroups');
       var dataToSend = this.getConfigRecommendationsParams(updateDependencies, changedConfigs);
       this.modifyRecommendationConfigGroups(recommendations);
 
