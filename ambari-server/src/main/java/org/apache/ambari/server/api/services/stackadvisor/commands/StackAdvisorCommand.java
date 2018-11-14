@@ -391,7 +391,7 @@ public abstract class StackAdvisorCommand<T extends StackAdvisorResponse> extend
     List<String> hostNames = new ArrayList<>(request.getHosts());
 
     List<JsonNode> resultInfos = new ArrayList<>();
-    if (hostInfoCache != null) {
+    if (hostInfoCache != null && !hostInfoCache.isEmpty()) {
       Iterator<String> hostNamesIterator = hostNames.iterator();
       while(hostNamesIterator.hasNext()) {
         String hostName = hostNamesIterator.next();

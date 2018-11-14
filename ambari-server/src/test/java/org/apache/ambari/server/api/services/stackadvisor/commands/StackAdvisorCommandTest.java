@@ -87,6 +87,9 @@ import com.google.common.collect.Lists;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class StackAdvisorCommandTest {
+  private static final String SINGLE_HOST_RESPONSE = "{\"href\":\"/api/v1/hosts?fields=Hosts/*&Hosts/host_name.in(%1$s)\",\"items\":[{\"href\":\"/api/v1/hosts/%1$s\",\"Hosts\":{\"host_name\":\"%1$s\"}}]}";
+  private static final String TWO_HOST_RESPONSE = "{\"href\":\"/api/v1/hosts?fields=Hosts/*&Hosts/host_name.in(%1$s,%2$s)\",\"items\":[{\"href\":\"/api/v1/hosts/%1$s\",\"Hosts\":{\"host_name\":\"%1$s\"}},{\"href\":\"/api/v1/hosts/%2$s\",\"Hosts\":{\"host_name\":\"%2$s\"}}]}";
+
   private TemporaryFolder temp = new TemporaryFolder();
   @Mock
   AmbariServerConfigurationHandler ambariServerConfigurationHandler;
@@ -326,41 +329,72 @@ public class StackAdvisorCommandTest {
     assertEquals(expectedLdapConfig, servicesRootNode);
   }
 
+  /**
+   * Try to retrieve host info twice. The inner cache should be populated with first usage (with handleRequest method calling).
+   * And for next info retrieving for the same host the saved value should be used.
+   */
   @Test
-  public void testHostInfoCaching() throws StackAdvisorException {
+  public void testHostInfoCachingSingleHost() throws StackAdvisorException {
+    File file = mock(File.class);
+    String recommendationsArtifactsLifetime = "1w";
+    StackAdvisorRunner stackAdvisorRunner = mock(StackAdvisorRunner.class);
+    AmbariMetaInfo ambariMetaInfo = mock(AmbariMetaInfo.class);
     Map<String, JsonNode> hostInfoCache = new HashMap<>();
-    /*TestStackAdvisorCommand command = partialMockBuilder(TestStackAdvisorCommand.class)
-        .withConstructor(StackAdvisorCommandType.class, File.class, String.class, ServiceInfo.ServiceAdvisorType.class,
-            Integer.class, StackAdvisorRunner.class, AmbariMetaInfo.class, AmbariServerConfigurationHandler.class,
-            Map.class)
-        .withArgs(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS, temp.newFolder("recommendationDir"), "1w",
-            ServiceInfo.ServiceAdvisorType.PYTHON, 1, createNiceMock(StackAdvisorRunner.class),
-            createNiceMock(AmbariMetaInfo.class), createNiceMock(AmbariServerConfigurationHandler.class), hostInfoCache)
-        .addMockedMethod("handleRequest", HttpHeaders.class, String.class, UriInfo.class, Request.Type.class,
-            ResourceInstance.class)
-        .createMock();*/
-    TestStackAdvisorCommand command = partialMockBuilder(TestStackAdvisorCommand.class)
-        .withConstructor(File.class, String.class, ServiceInfo.ServiceAdvisorType.class,
-            Integer.class, StackAdvisorRunner.class, AmbariMetaInfo.class,
-            Map.class)
-        .withArgs(temp.newFolder("recommendationDir"), "1w",
-            ServiceInfo.ServiceAdvisorType.PYTHON, 1, createNiceMock(StackAdvisorRunner.class),
-            createNiceMock(AmbariMetaInfo.class), createNiceMock(AmbariServerConfigurationHandler.class), hostInfoCache)
-        .addMockedMethod("handleRequest", HttpHeaders.class, String.class, UriInfo.class, Request.Type.class,
-            ResourceInstance.class)
-        .createMock();
-    expect(command.handleRequest(anyObject(), anyObject(), anyObject(), anyObject(), anyObject(), anyObject()))
-        .andReturn(Response.status(200).entity().build());
+    TestStackAdvisorCommand command = spy(new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime,
+        ServiceInfo.ServiceAdvisorType.PYTHON, 1,
+        stackAdvisorRunner, ambariMetaInfo, hostInfoCache));
 
-    replay(command);
+    // in second handling case NPE will be fired during result processing
+    doReturn(Response.status(200).entity(String.format(SINGLE_HOST_RESPONSE, "hostName1")).build())
+        .doReturn(null)
+        .when(command).handleRequest(any(HttpHeaders.class), any(String.class), any(UriInfo.class), any(Request.Type.class),
+        any(MediaType.class), any(ResourceInstance.class));
 
     StackAdvisorRequest request = StackAdvisorRequestBuilder.
         forStack(null, null).ofType(StackAdvisorRequest.StackAdvisorRequestType.CONFIGURATIONS).
-        forHosts(Arrays.asList(new String[]{"hostname1", "hostName2"})).
+        forHosts(Arrays.asList(new String[]{"hostName1"})).
         build();
-    command.getHostsInformation(request);
+    String firstResponse = command.getHostsInformation(request);
+    assertEquals(String.format(SINGLE_HOST_RESPONSE, "hostName1"), firstResponse);
 
-    verify(command);
+    String secondResponse = command.getHostsInformation(request);
+    assertEquals(String.format(SINGLE_HOST_RESPONSE, "hostName1"), secondResponse);
+  }
+
+  /**
+   * Try to retrieve multiple hosts info twice. The inner cache should be populated with first usage for first host (hostName1).
+   * For the next usage with the both hosts handleRequest should be used for second host only.
+   */
+  @Test
+  public void testHostInfoCachingTwoHost() throws StackAdvisorException {
+    File file = mock(File.class);
+    String recommendationsArtifactsLifetime = "1w";
+    StackAdvisorRunner stackAdvisorRunner = mock(StackAdvisorRunner.class);
+    AmbariMetaInfo ambariMetaInfo = mock(AmbariMetaInfo.class);
+    Map<String, JsonNode> hostInfoCache = new HashMap<>();
+    TestStackAdvisorCommand command = spy(new TestStackAdvisorCommand(file, recommendationsArtifactsLifetime,
+        ServiceInfo.ServiceAdvisorType.PYTHON, 1,
+        stackAdvisorRunner, ambariMetaInfo, hostInfoCache));
+
+    doReturn(Response.status(200).entity(String.format(SINGLE_HOST_RESPONSE, "hostName1")).build())
+        .doReturn(Response.status(200).entity(String.format(SINGLE_HOST_RESPONSE, "hostName2")).build())
+        .doReturn(null)
+        .when(command).handleRequest(any(HttpHeaders.class), any(String.class), any(UriInfo.class), any(Request.Type.class),
+        any(MediaType.class), any(ResourceInstance.class));
+
+    StackAdvisorRequest request = StackAdvisorRequestBuilder.
+        forStack(null, null).ofType(StackAdvisorRequest.StackAdvisorRequestType.CONFIGURATIONS).
+        forHosts(Arrays.asList(new String[]{"hostName1"})).
+        build();
+    String firstResponse = command.getHostsInformation(request);
+    assertEquals(String.format(SINGLE_HOST_RESPONSE, "hostName1"), firstResponse);
+
+    request = StackAdvisorRequestBuilder.
+        forStack(null, null).ofType(StackAdvisorRequest.StackAdvisorRequestType.CONFIGURATIONS).
+        forHosts(Arrays.asList(new String[]{"hostName1", "hostName2"})).
+        build();
+    String secondResponse = command.getHostsInformation(request);
+    assertEquals(String.format(TWO_HOST_RESPONSE, "hostName1", "hostName2"), secondResponse);
   }
 
   private static String jsonString(Object obj) throws IOException {
