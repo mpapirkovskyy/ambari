@@ -327,7 +327,6 @@ public class StackAdvisorCommandTest {
   }
 
   @Test
-  //TODO not completed
   public void testHostInfoCaching() throws StackAdvisorException {
     Map<String, JsonNode> hostInfoCache = new HashMap<>();
     /*TestStackAdvisorCommand command = partialMockBuilder(TestStackAdvisorCommand.class)
@@ -351,7 +350,7 @@ public class StackAdvisorCommandTest {
             ResourceInstance.class)
         .createMock();
     expect(command.handleRequest(anyObject(), anyObject(), anyObject(), anyObject(), anyObject(), anyObject()))
-        .andReturn(Response.status(200).build());
+        .andReturn(Response.status(200).entity().build());
 
     replay(command);
 
