@@ -195,10 +195,10 @@ public class StackAdvisorHelper {
           requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
     } else if (requestType == StackAdvisorRequestType.SSO_CONFIGURATIONS) {
       command = new ConfigurationRecommendationCommand(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS_FOR_SSO, recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
-          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
+          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, null);
     } else if (requestType == StackAdvisorRequestType.KERBEROS_CONFIGURATIONS) {
       command = new ConfigurationRecommendationCommand(StackAdvisorCommandType.RECOMMEND_CONFIGURATIONS_FOR_KERBEROS, recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
-          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, hostInfoCache);
+          requestId, saRunner, metaInfo, ambariServerConfigurationHandler, null);
     } else if (requestType == StackAdvisorRequestType.CONFIGURATION_DEPENDENCIES) {
       command = new ConfigurationDependenciesRecommendationCommand(recommendationsDir, recommendationsArtifactsLifetime, serviceAdvisorType,
           requestId, saRunner, metaInfo, ambariServerConfigurationHandler);

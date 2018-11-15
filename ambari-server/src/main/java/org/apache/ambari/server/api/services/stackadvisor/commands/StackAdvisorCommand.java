@@ -390,6 +390,7 @@ public abstract class StackAdvisorCommand<T extends StackAdvisorResponse> extend
   String getHostsInformation(StackAdvisorRequest request) throws StackAdvisorException {
     List<String> hostNames = new ArrayList<>(request.getHosts());
 
+    // retrieve cached info
     List<JsonNode> resultInfos = new ArrayList<>();
     if (hostInfoCache != null && !hostInfoCache.isEmpty()) {
       Iterator<String> hostNamesIterator = hostNames.iterator();
@@ -404,6 +405,7 @@ public abstract class StackAdvisorCommand<T extends StackAdvisorResponse> extend
     }
     String hostsJSON = null;
 
+    // get hosts info for not cached hosts only
     if (!hostNames.isEmpty()) {
       LOG.info(String.format("Fire host info request for hosts: " + hostNames.toString()));
       String hostsURI = String.format(GET_HOSTS_INFO_URI, String.join(",", hostNames));
@@ -425,6 +427,7 @@ public abstract class StackAdvisorCommand<T extends StackAdvisorResponse> extend
       }
     }
 
+    // when cache is used we should merge cached info with just got
     if (hostInfoCache != null) {
       if (hostsJSON != null && !hostsJSON.isEmpty()) {
         try {

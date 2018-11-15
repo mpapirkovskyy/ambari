@@ -308,9 +308,9 @@ public abstract class StackAdvisorResourceProvider extends ReadOnlyResourceProvi
   }
 
   /**
-   *
-   * @param cluster
-   * @return
+   * Retrieves hosts names mapped by host groups, host name is used as host group identifier
+   * @param cluster cluster for calculating hosts mapping by host groups
+   * @return map "host group name" -> ["host name 1"]
    */
   private Map<String, Set<String>> calculateHostGroupHostsMap(Cluster cluster) {
     Map<String, Set<String>> map = new HashMap<>();
