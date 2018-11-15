@@ -405,6 +405,7 @@ public abstract class StackAdvisorCommand<T extends StackAdvisorResponse> extend
     String hostsJSON = null;
 
     if (!hostNames.isEmpty()) {
+      LOG.info(String.format("Fire host info request for hosts: " + hostNames.toString()));
       String hostsURI = String.format(GET_HOSTS_INFO_URI, String.join(",", hostNames));
 
       Response response = handleRequest(null, null, new LocalUriInfo(hostsURI), Request.Type.GET,

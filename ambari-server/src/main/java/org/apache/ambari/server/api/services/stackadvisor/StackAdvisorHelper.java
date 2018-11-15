@@ -150,8 +150,10 @@ public class StackAdvisorHelper {
     RecommendationResponse response = null;
     if (requestType == StackAdvisorRequestType.CONFIGURATIONS) {
       String hash = getHash(request);
+      LOG.info(String.format("Arrived configuration stack advisor request with hash: %s, service: %s", hash, request.getServiceName()));
       response = configsRecommendationResponse.computeIfAbsent(hash, h -> {
         try {
+          LOG.info(String.format("Invoking configuration stack advisor request with hash: %s, service: %s", hash, request.getServiceName()));
           return command.invoke(request, serviceAdvisorType);
         } catch (StackAdvisorException e) {
           return null;
@@ -240,6 +242,7 @@ public class StackAdvisorHelper {
   public void clearCaches(String hostName) {
     configsRecommendationResponse.clear();
     hostInfoCache.remove(hostName);
+    LOG.info("Clear stack advisor caches, host: " + hostName);
   }
 
   public void clearCaches(Set<String> hostNames) {
@@ -249,6 +252,7 @@ public class StackAdvisorHelper {
         hostInfoCache.remove(hostName);
       }
     }
+    LOG.info("Clear stack advisor caches, hosts: " + hostNames.toString());
   }
 
 }
