@@ -18,6 +18,7 @@
 package org.apache.ambari.server.api.stomp;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -32,26 +33,32 @@ import com.google.inject.Singleton;
 public class NamedTasksSubscriptions {
   private static Logger LOG = LoggerFactory.getLogger(NamedTasksSubscriptions.class);
 
-  private ConcurrentHashMap<String, List<Long>> taskIds = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, List<SubscriptionId>> taskIds = new ConcurrentHashMap<>();
   private final Pattern pattern = Pattern.compile("^/events/tasks/(\\d*)$");
 
-  public void addTaskId(String sessionId, Long taskId) {
+  public void addTaskId(String sessionId, Long taskId, String id) {
     taskIds.putIfAbsent(sessionId, new ArrayList<>());
-    taskIds.get(sessionId).add(taskId);
-    LOG.info(String.format("DEBUG Task subscription was added for sessionId = %s, taskId = %s", sessionId, taskId));
+    taskIds.get(sessionId).add(new SubscriptionId(taskId, id));
+    LOG.info(String.format("Task subscription was added for sessionId = %s, taskId = %s, id = %s",
+        sessionId, taskId, id));
   }
 
-  public void removeTaskId(String sessionId, Long taskId) {
+  public void removeId(String sessionId, String taskId) {
     taskIds.computeIfPresent(sessionId, (id, tasks) -> {
-      tasks.remove(taskId);
-      LOG.info(String.format("DEBUG Task subscription was removed for sessionId = %s, taskId = %s", sessionId, taskId));
+      Iterator<SubscriptionId> iterator = tasks.iterator();
+      while (iterator.hasNext()) {
+        if (iterator.next().getId().equals(taskId)) {
+          iterator.remove();
+          LOG.info(String.format("Task subscription was removed for sessionId = %s, taskId = %s", sessionId, taskId));
+        }
+      }
       return tasks;
     });
   }
 
   public void removeSession(String sessionId) {
     taskIds.remove(sessionId);
-    LOG.info(String.format("DEBUG Task subscriptions were removed for sessionId = %s", sessionId));
+    LOG.info(String.format("Task subscriptions were removed for sessionId = %s", sessionId));
   }
 
   public Long matchDestination(String destination) {
@@ -62,26 +69,39 @@ public class NamedTasksSubscriptions {
     return null;
   }
 
-  public void addDestination(String sessionId, String destination) {
+  public void addDestination(String sessionId, String destination, String id) {
     Long taskId = matchDestination(destination);
     if (taskId != null) {
-      addTaskId(sessionId, taskId);
-    }
-  }
-
-  public void removeDestination(String sessionId, String destination) {
-    Long taskId = matchDestination(destination);
-    if (taskId != null) {
-      removeTaskId(sessionId, taskId);
+      addTaskId(sessionId, taskId, id);
     }
   }
 
   public boolean checkTaskId(Long taskId) {
-    for (List<Long> ids: taskIds.values()) {
-      if (ids.contains(taskId)) {
-        return true;
+    for (List<SubscriptionId> ids: taskIds.values()) {
+      for (SubscriptionId subscriptionId : ids) {
+        if (subscriptionId.getTaskId().equals(taskId)) {
+          return true;
+        }
       }
     }
     return false;
+  }
+
+  public class SubscriptionId {
+    private final Long taskId;
+    private final String id;
+
+    public SubscriptionId(Long taskId, String id) {
+      this.taskId = taskId;
+      this.id = id;
+    }
+
+    public Long getTaskId() {
+      return taskId;
+    }
+
+    public String getId() {
+      return id;
+    }
   }
 }

@@ -62,16 +62,16 @@ public class NamedTaskUpdateEvent extends STOMPEvent {
 
   public NamedTaskUpdateEvent(HostRoleCommand hostRoleCommand) {
     super(Type.NAMEDTASK);
-    this.id = id;
-    this.requestId = requestId;
-    this.hostName = hostName;
-    this.endTime = endTime;
-    this.status = status;
-    this.errorLog = errorLog;
-    this.outLog = outLog;
-    this.stderr = stderr;
-    this.stdout = stdout;
-    this.structuredOut = structuredOut;
+    this.id = hostRoleCommand.getTaskId();
+    this.requestId = hostRoleCommand.getRequestId();
+    this.hostName = hostRoleCommand.getHostName();
+    this.endTime = hostRoleCommand.getEndTime();
+    this.status = hostRoleCommand.getStatus();
+    this.errorLog = hostRoleCommand.getErrorLog();
+    this.outLog = hostRoleCommand.getOutputLog();
+    this.stderr = hostRoleCommand.getStderr();
+    this.stdout = hostRoleCommand.getStdout();
+    this.structuredOut = hostRoleCommand.getStructuredOut();
   }
 
   public Long getId() {

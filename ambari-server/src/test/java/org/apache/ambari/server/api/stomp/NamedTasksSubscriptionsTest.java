@@ -34,10 +34,10 @@ public class NamedTasksSubscriptionsTest {
   @Before
   public void setupTest() {
     tasksSubscriptions = new NamedTasksSubscriptions();
-    tasksSubscriptions.addTaskId(SESSION_ID_1, 1L);
-    tasksSubscriptions.addTaskId(SESSION_ID_1, 5L);
-    tasksSubscriptions.addTaskId(SESSION_ID_2, 1L);
-    tasksSubscriptions.addTaskId(SESSION_ID_2, 4L);
+    tasksSubscriptions.addTaskId(SESSION_ID_1, 1L, "sub-1");
+    tasksSubscriptions.addTaskId(SESSION_ID_1, 5L, "sub-5");
+    tasksSubscriptions.addTaskId(SESSION_ID_2, 1L, "sub-1");
+    tasksSubscriptions.addTaskId(SESSION_ID_2, 4L, "sub-4");
   }
 
   @Test
@@ -68,46 +68,23 @@ public class NamedTasksSubscriptionsTest {
   }
 
   @Test
-  public void testRemoveByTaskId() {
-    tasksSubscriptions.removeTaskId(SESSION_ID_1, 1L);
+  public void testRemoveById() {
+    tasksSubscriptions.removeId(SESSION_ID_1, "sub-1");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertTrue(tasksSubscriptions.checkTaskId(4L));
     assertTrue(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.removeTaskId(SESSION_ID_1, 5L);
+    tasksSubscriptions.removeId(SESSION_ID_1, "sub-5");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertTrue(tasksSubscriptions.checkTaskId(4L));
     assertFalse(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.removeTaskId(SESSION_ID_2, 1L);
+    tasksSubscriptions.removeId(SESSION_ID_2, "sub-1");
     assertFalse(tasksSubscriptions.checkTaskId(1L));
     assertTrue(tasksSubscriptions.checkTaskId(4L));
     assertFalse(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.removeTaskId(SESSION_ID_2, 4L);
-    assertFalse(tasksSubscriptions.checkTaskId(1L));
-    assertFalse(tasksSubscriptions.checkTaskId(4L));
-    assertFalse(tasksSubscriptions.checkTaskId(5L));
-  }
-
-  @Test
-  public void testRemoveDestination() {
-    tasksSubscriptions.removeDestination(SESSION_ID_1, "/events/tasks/1");
-    assertTrue(tasksSubscriptions.checkTaskId(1L));
-    assertTrue(tasksSubscriptions.checkTaskId(4L));
-    assertTrue(tasksSubscriptions.checkTaskId(5L));
-
-    tasksSubscriptions.removeDestination(SESSION_ID_1, "/events/tasks/5");
-    assertTrue(tasksSubscriptions.checkTaskId(1L));
-    assertTrue(tasksSubscriptions.checkTaskId(4L));
-    assertFalse(tasksSubscriptions.checkTaskId(5L));
-
-    tasksSubscriptions.removeDestination(SESSION_ID_2, "/events/tasks/1");
-    assertFalse(tasksSubscriptions.checkTaskId(1L));
-    assertTrue(tasksSubscriptions.checkTaskId(4L));
-    assertFalse(tasksSubscriptions.checkTaskId(5L));
-
-    tasksSubscriptions.removeDestination(SESSION_ID_2, "/events/tasks/4");
+    tasksSubscriptions.removeId(SESSION_ID_2, "sub-4");
     assertFalse(tasksSubscriptions.checkTaskId(1L));
     assertFalse(tasksSubscriptions.checkTaskId(4L));
     assertFalse(tasksSubscriptions.checkTaskId(5L));
@@ -116,22 +93,22 @@ public class NamedTasksSubscriptionsTest {
   @Test
   public void testAddDestination() {
     tasksSubscriptions = new NamedTasksSubscriptions();
-    tasksSubscriptions.addDestination(SESSION_ID_1, "/events/tasks/1");
+    tasksSubscriptions.addDestination(SESSION_ID_1, "/events/tasks/1", "sub-1");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertFalse(tasksSubscriptions.checkTaskId(4L));
     assertFalse(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.addDestination(SESSION_ID_1, "/events/tasks/5");
+    tasksSubscriptions.addDestination(SESSION_ID_1, "/events/tasks/5", "sub-5");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertFalse(tasksSubscriptions.checkTaskId(4L));
     assertTrue(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.addDestination(SESSION_ID_2, "/events/tasks/1");
+    tasksSubscriptions.addDestination(SESSION_ID_2, "/events/tasks/1", "sub-1");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertFalse(tasksSubscriptions.checkTaskId(4L));
     assertTrue(tasksSubscriptions.checkTaskId(5L));
 
-    tasksSubscriptions.addDestination(SESSION_ID_2, "/events/tasks/4");
+    tasksSubscriptions.addDestination(SESSION_ID_2, "/events/tasks/4", "sub-4");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertTrue(tasksSubscriptions.checkTaskId(4L));
     assertTrue(tasksSubscriptions.checkTaskId(5L));

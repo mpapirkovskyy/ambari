@@ -184,7 +184,7 @@ public class TaskStatusListenerTest extends EasyMockSupport {
     final String outputLog = "546ky3kt%V$WYk4tgs5xzs";
 
     NamedTasksSubscriptions namedTasksSubscriptions = new NamedTasksSubscriptions();
-    namedTasksSubscriptions.addTaskId("", taskId);
+    namedTasksSubscriptions.addTaskId("", taskId, "sub-1");
 
     Capture<NamedTaskUpdateEvent> namedTaskUpdateEventCapture = Capture.newInstance();
     STOMPUpdatePublisher stompUpdatePublisher = createStrictMock(STOMPUpdatePublisher.class);
@@ -220,8 +220,13 @@ public class TaskStatusListenerTest extends EasyMockSupport {
     TaskStatusListener listener = new TaskStatusListener(publisher, stageDAO, requestDAO, stompUpdatePublisher,
         namedTasksSubscriptions);
 
-    // add
-    listener.getActiveTasksMap().put(taskId, updateHostRoleCommand);
+    // add dummy host role command as active
+    // status should be the same to avoid request update event firing
+    HostRoleCommand activeHostRoleCommand = new HostRoleCommand("hostName", Role.DATANODE,
+        serviceComponentHostEvent, RoleCommand.EXECUTE, hostDAO, executionCommandDAO, ecwFactory);
+    activeHostRoleCommand.setStatus(status);
+    listener.getActiveTasksMap().put(taskId, activeHostRoleCommand);
+
     listener.onTaskUpdateEvent(new TaskUpdateEvent(updateHostRolesCommands));
 
     Assert.assertNotNull(namedTaskUpdateEventCapture.getValues());

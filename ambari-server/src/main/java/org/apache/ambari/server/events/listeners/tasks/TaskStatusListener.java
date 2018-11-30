@@ -149,17 +149,9 @@ public class TaskStatusListener {
         stagesWithReceivedTaskStatus.add(stageEntityPK);
         requestIdsWithReceivedTaskStatus.add(hostRoleCommand.getRequestId());
 
-        NamedTaskUpdateEvent namedTaskUpdateEvent = new NamedTaskUpdateEvent(reportedTaskId,
-            hostRoleCommand.getRequestId(),
-            hostRoleCommand.getHostName(),
-            hostRoleCommand.getEndTime(),
-            hostRoleCommand.getStatus(),
-            hostRoleCommand.getErrorLog(),
-            hostRoleCommand.getOutputLog(),
-            hostRoleCommand.getStderr(),
-            hostRoleCommand.getStdout(),
-            hostRoleCommand.getStructuredOut());
-        if (namedTasksSubscriptions.checkTaskId(reportedTaskId)/* && !namedTaskUpdateEvent.equals()*/) {
+        NamedTaskUpdateEvent namedTaskUpdateEvent = new NamedTaskUpdateEvent(hostRoleCommand);
+        if (namedTasksSubscriptions.checkTaskId(reportedTaskId)
+            && !namedTaskUpdateEvent.equals(new NamedTaskUpdateEvent(activeTasksMap.get(reportedTaskId)))) {
           namedTasksToPublish.add(namedTaskUpdateEvent);
         }
 
@@ -199,7 +191,7 @@ public class TaskStatusListener {
       STOMPUpdatePublisher.publish(requestToPublish);
     }
     for (NamedTaskUpdateEvent namedTaskUpdateEvent : namedTasksToPublish) {
-      LOG.info(String.format("DEBUG NamedTaskUpdateEvent with id %s will be send", namedTaskUpdateEvent.getId()));
+      LOG.info(String.format("NamedTaskUpdateEvent with id %s will be send", namedTaskUpdateEvent.getId()));
       STOMPUpdatePublisher.publish(namedTaskUpdateEvent);
     }
   }

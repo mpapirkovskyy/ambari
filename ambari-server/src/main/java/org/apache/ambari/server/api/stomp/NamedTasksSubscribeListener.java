@@ -39,14 +39,14 @@ public class NamedTasksSubscribeListener {
   public void subscribe(SessionSubscribeEvent sse)
   {
     MessageHeaders msgHeaders = sse.getMessage().getHeaders();
-    StompHeaderAccessor sha = StompHeaderAccessor.wrap(sse.getMessage());
     String sessionId  = (String) msgHeaders.get("simpSessionId");
     String destination  = (String) msgHeaders.get("simpDestination");
-    if (sessionId != null && destination != null) {
-      LOG.info(String.format("DEBUG API subscribe was arrived with sessionId = %s and destination = %s",
-          sessionId, destination));
-      namedTasksSubscriptions.addDestination(sessionId, destination);
+    String id  = (String) msgHeaders.get("simpSubscriptionId");
+    if (sessionId != null && destination != null && id != null) {
+      namedTasksSubscriptions.addDestination(sessionId, destination, id);
     }
+    LOG.info(String.format("API subscribe was arrived with sessionId = %s, destination = %s and id = %s",
+        sessionId, destination, id));
   }
 
   @EventListener
@@ -54,12 +54,12 @@ public class NamedTasksSubscribeListener {
   {
     MessageHeaders msgHeaders = suse.getMessage().getHeaders();
     String sessionId  = (String) msgHeaders.get("simpSessionId");
-    String destination  = (String) msgHeaders.get("simpDestination");
-    if (sessionId != null && destination != null) {
-      LOG.info(String.format("DEBUG API unsubscribe was arrived with sessionId = %s and destination = %s",
-          sessionId, destination));
-      namedTasksSubscriptions.removeDestination(sessionId, destination);
+    String id  = (String) msgHeaders.get("simpSubscriptionId");
+    if (sessionId != null && id != null) {
+      namedTasksSubscriptions.removeId(sessionId, id);
     }
+    LOG.info(String.format("API unsubscribe was arrived with sessionId = %s and id = %s",
+        sessionId, id));
   }
 
   @EventListener
@@ -68,9 +68,9 @@ public class NamedTasksSubscribeListener {
     MessageHeaders msgHeaders = sde.getMessage().getHeaders();
     String sessionId  = (String) msgHeaders.get("simpSessionId");
     if (sessionId != null) {
-      LOG.info(String.format("DEBUG API disconnect was arrived with sessionId = %s",
-          sessionId));
       namedTasksSubscriptions.removeSession(sessionId);
     }
+    LOG.info(String.format("API disconnect was arrived with sessionId = %s",
+        sessionId));
   }
 }
