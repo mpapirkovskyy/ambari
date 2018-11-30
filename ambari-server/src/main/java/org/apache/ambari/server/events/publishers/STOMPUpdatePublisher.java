@@ -26,8 +26,6 @@ import org.apache.ambari.server.events.HostComponentsUpdateEvent;
 import org.apache.ambari.server.events.RequestUpdateEvent;
 import org.apache.ambari.server.events.STOMPEvent;
 import org.apache.ambari.server.events.ServiceUpdateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
@@ -37,8 +35,6 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class STOMPUpdatePublisher {
-
-  private static Logger LOG = LoggerFactory.getLogger(STOMPUpdatePublisher.class);
 
   private final EventBus agentEventBus;
   private final EventBus apiEventBus;
@@ -71,7 +67,6 @@ public class STOMPUpdatePublisher {
     } else if (DefaultMessageEmitter.DEFAULT_API_EVENT_TYPES.contains(event.getType())) {
       publishAPI(event);
     } else {
-      LOG.info(String.format("DEBUG Event with type {%s} can not be published.", event.getType()));
       // TODO need better solution
       throw new AmbariRuntimeException("Event with type {" + event.getType() + "} can not be published.");
     }
