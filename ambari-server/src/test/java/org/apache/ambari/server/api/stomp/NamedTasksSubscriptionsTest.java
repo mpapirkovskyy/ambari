@@ -17,23 +17,55 @@
  */
 package org.apache.ambari.server.api.stomp;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.ambari.server.actionmanager.HostRoleCommand;
+import org.apache.ambari.server.actionmanager.HostRoleStatus;
+import org.apache.ambari.server.events.listeners.tasks.TaskStatusListener;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.inject.Provider;
 
 public class NamedTasksSubscriptionsTest {
   private static final String SESSION_ID_1 = "fdsg3";
   private static final String SESSION_ID_2 = "idfg6";
 
   private NamedTasksSubscriptions tasksSubscriptions;
+  private Provider<TaskStatusListener> taskStatusListenerProvider;
+  private TaskStatusListener taskStatusListener;
 
   @Before
   public void setupTest() {
-    tasksSubscriptions = new NamedTasksSubscriptions();
+    taskStatusListenerProvider = createMock(Provider.class);
+    taskStatusListener = createMock(TaskStatusListener.class);
+
+    Map<Long, HostRoleCommand> hostRoleCommands = new HashMap<>();
+    HostRoleCommand hostRoleCommand1 = createMock(HostRoleCommand.class);
+    HostRoleCommand hostRoleCommand4 = createMock(HostRoleCommand.class);
+    HostRoleCommand hostRoleCommand5 = createMock(HostRoleCommand.class);
+
+    expect(hostRoleCommand1.getStatus()).andReturn(HostRoleStatus.IN_PROGRESS).anyTimes();
+    expect(hostRoleCommand4.getStatus()).andReturn(HostRoleStatus.IN_PROGRESS).anyTimes();
+    expect(hostRoleCommand5.getStatus()).andReturn(HostRoleStatus.IN_PROGRESS).anyTimes();
+
+    hostRoleCommands.put(1L, hostRoleCommand1);
+    hostRoleCommands.put(4L, hostRoleCommand4);
+    hostRoleCommands.put(5L, hostRoleCommand5);
+    expect(taskStatusListener.getActiveTasksMap()).andReturn(hostRoleCommands).anyTimes();
+    expect(taskStatusListenerProvider.get()).andReturn(taskStatusListener).anyTimes();
+
+    replay(taskStatusListenerProvider, taskStatusListener, hostRoleCommand1, hostRoleCommand4, hostRoleCommand5);
+    tasksSubscriptions = new NamedTasksSubscriptions(taskStatusListenerProvider);
     tasksSubscriptions.addTaskId(SESSION_ID_1, 1L, "sub-1");
     tasksSubscriptions.addTaskId(SESSION_ID_1, 5L, "sub-5");
     tasksSubscriptions.addTaskId(SESSION_ID_2, 1L, "sub-1");
@@ -92,7 +124,7 @@ public class NamedTasksSubscriptionsTest {
 
   @Test
   public void testAddDestination() {
-    tasksSubscriptions = new NamedTasksSubscriptions();
+    tasksSubscriptions = new NamedTasksSubscriptions(taskStatusListenerProvider);
     tasksSubscriptions.addDestination(SESSION_ID_1, "/events/tasks/1", "sub-1");
     assertTrue(tasksSubscriptions.checkTaskId(1L));
     assertFalse(tasksSubscriptions.checkTaskId(4L));

@@ -22,6 +22,7 @@ import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 
 public class TaskStatusListenerTest extends EasyMockSupport {
@@ -183,8 +185,9 @@ public class TaskStatusListenerTest extends EasyMockSupport {
     final String errorLog = " wTHT J YHKtjgsjgbvklfj";
     final String outputLog = "546ky3kt%V$WYk4tgs5xzs";
 
-    NamedTasksSubscriptions namedTasksSubscriptions = new NamedTasksSubscriptions();
-    namedTasksSubscriptions.addTaskId("", taskId, "sub-1");
+    Provider<TaskStatusListener> taskStatusListenerProvider = createMock(Provider.class);
+
+    NamedTasksSubscriptions namedTasksSubscriptions = new NamedTasksSubscriptions(taskStatusListenerProvider);
 
     Capture<NamedTaskUpdateEvent> namedTaskUpdateEventCapture = Capture.newInstance();
     STOMPUpdatePublisher stompUpdatePublisher = createStrictMock(STOMPUpdatePublisher.class);
@@ -219,6 +222,13 @@ public class TaskStatusListenerTest extends EasyMockSupport {
 
     TaskStatusListener listener = new TaskStatusListener(publisher, stageDAO, requestDAO, stompUpdatePublisher,
         namedTasksSubscriptions);
+
+    expect(taskStatusListenerProvider.get()).andReturn(listener);
+
+    EasyMock.replay(taskStatusListenerProvider);
+
+    // subscribe for task
+    namedTasksSubscriptions.addTaskId("", taskId, "sub-1");
 
     // add dummy host role command as active
     // status should be the same to avoid request update event firing

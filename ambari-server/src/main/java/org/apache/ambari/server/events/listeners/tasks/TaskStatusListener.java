@@ -155,6 +155,11 @@ public class TaskStatusListener {
           namedTasksToPublish.add(namedTaskUpdateEvent);
         }
 
+        // unsubscribe on complete (no any update will be sent anyway)
+        if (hostRoleCommand.getStatus().equals(HostRoleStatus.COMPLETED)) {
+          namedTasksSubscriptions.removeTaskId(reportedTaskId);
+        }
+
         if (!activeTasksMap.get(reportedTaskId).getStatus().equals(hostRoleCommand.getStatus())) {
           // Ignore requests not related to any cluster. "requests" topic is used for cluster requests only.
           Long clusterId = activeRequestMap.get(hostRoleCommand.getRequestId()).getClusterId();

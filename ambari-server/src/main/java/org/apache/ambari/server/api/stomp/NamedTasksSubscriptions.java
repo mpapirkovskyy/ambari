@@ -21,12 +21,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.ambari.server.events.listeners.tasks.TaskStatusListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
@@ -35,30 +41,83 @@ public class NamedTasksSubscriptions {
 
   private ConcurrentHashMap<String, List<SubscriptionId>> taskIds = new ConcurrentHashMap<>();
   private final Pattern pattern = Pattern.compile("^/events/tasks/(\\d*)$");
+  private final Lock taskIdsLock = new ReentrantLock();
 
-  public void addTaskId(String sessionId, Long taskId, String id) {
-    taskIds.putIfAbsent(sessionId, new ArrayList<>());
-    taskIds.get(sessionId).add(new SubscriptionId(taskId, id));
-    LOG.info(String.format("Task subscription was added for sessionId = %s, taskId = %s, id = %s",
-        sessionId, taskId, id));
+  private Provider<TaskStatusListener> taskStatusListenerProvider;
+
+  @Inject
+  public NamedTasksSubscriptions(Provider<TaskStatusListener> taskStatusListenerProvider) {
+    this.taskStatusListenerProvider = taskStatusListenerProvider;
   }
 
-  public void removeId(String sessionId, String taskId) {
-    taskIds.computeIfPresent(sessionId, (id, tasks) -> {
+  public void addTaskId(String sessionId, Long taskId, String id) {
+    try {
+      taskIdsLock.lock();
+      taskIds.compute(sessionId, (sid, ids) -> {
+        if (ids == null) {
+          ids = new ArrayList<>();
+        }
+        AtomicBoolean completed = new AtomicBoolean(false);
+        taskStatusListenerProvider.get().getActiveTasksMap().computeIfPresent(taskId, (tid, task) -> {
+          if (task.getStatus().isCompletedState()) {
+            completed.set(true);
+          }
+          return task;
+        });
+        if (!completed.get()) {
+          ids.add(new SubscriptionId(taskId, id));
+        }
+        return ids;
+      });
+      LOG.info(String.format("Task subscription was added for sessionId = %s, taskId = %s, id = %s",
+          sessionId, taskId, id));
+    } finally {
+      taskIdsLock.unlock();
+    }
+  }
+
+  public void removeId(String sessionId, String id) {
+    taskIds.computeIfPresent(sessionId, (sid, tasks) -> {
       Iterator<SubscriptionId> iterator = tasks.iterator();
       while (iterator.hasNext()) {
-        if (iterator.next().getId().equals(taskId)) {
+        if (iterator.next().getId().equals(id)) {
           iterator.remove();
-          LOG.info(String.format("Task subscription was removed for sessionId = %s, taskId = %s", sessionId, taskId));
+          LOG.info(String.format("Task subscription was removed for sessionId = %s, id = %s", sessionId, id));
         }
       }
       return tasks;
     });
   }
 
+  public void removeTaskId(Long taskId) {
+    try {
+      taskIdsLock.lock();
+      for (String sessionId : taskIds.keySet()) {
+        taskIds.computeIfPresent(sessionId, (id, tasks) -> {
+          Iterator<SubscriptionId> iterator = tasks.iterator();
+          while (iterator.hasNext()) {
+            if (iterator.next().getTaskId().equals(taskId)) {
+              iterator.remove();
+              LOG.info(String.format("Task subscription was removed for sessionId = %s and taskId = %s",
+                  sessionId, taskId));
+            }
+          }
+          return tasks;
+        });
+      }
+    } finally {
+      taskIdsLock.unlock();
+    }
+  }
+
   public void removeSession(String sessionId) {
-    taskIds.remove(sessionId);
-    LOG.info(String.format("Task subscriptions were removed for sessionId = %s", sessionId));
+    try {
+      taskIdsLock.lock();
+      taskIds.remove(sessionId);
+      LOG.info(String.format("Task subscriptions were removed for sessionId = %s", sessionId));
+    } finally {
+       taskIdsLock.unlock();
+    }
   }
 
   public Long matchDestination(String destination) {
