@@ -20,9 +20,11 @@ package org.apache.ambari.server.events;
 
 import java.util.Objects;
 
+import org.apache.ambari.server.actionmanager.HostRoleCommand;
 import org.apache.ambari.server.actionmanager.HostRoleStatus;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Single host role command update info. This update will be sent to all subscribed recipients.
@@ -39,10 +41,26 @@ public class NamedTaskUpdateEvent extends STOMPEvent {
   private String outLog;
   private String stderr;
   private String stdout;
+
+  @JsonProperty("structured_out")
   private String structuredOut;
 
   public NamedTaskUpdateEvent(Long id, Long requestId, String hostName, Long endTime, HostRoleStatus status,
                               String errorLog, String outLog, String stderr, String stdout, String structuredOut) {
+    super(Type.NAMEDTASK);
+    this.id = id;
+    this.requestId = requestId;
+    this.hostName = hostName;
+    this.endTime = endTime;
+    this.status = status;
+    this.errorLog = errorLog;
+    this.outLog = outLog;
+    this.stderr = stderr;
+    this.stdout = stdout;
+    this.structuredOut = structuredOut;
+  }
+
+  public NamedTaskUpdateEvent(HostRoleCommand hostRoleCommand) {
     super(Type.NAMEDTASK);
     this.id = id;
     this.requestId = requestId;

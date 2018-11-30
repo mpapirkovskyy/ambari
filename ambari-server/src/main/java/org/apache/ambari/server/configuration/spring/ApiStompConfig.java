@@ -17,7 +17,7 @@
  */
 package org.apache.ambari.server.configuration.spring;
 
-import org.apache.ambari.server.agent.stomp.NamedTasksSubscriptions;
+import org.apache.ambari.server.api.stomp.NamedTasksSubscriptions;
 import org.apache.ambari.server.api.stomp.TestController;
 import org.apache.ambari.server.events.DefaultMessageEmitter;
 import org.apache.ambari.server.events.listeners.requests.STOMPUpdateListener;

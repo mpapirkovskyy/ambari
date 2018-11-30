@@ -34,7 +34,7 @@ import org.apache.ambari.server.actionmanager.HostRoleCommand;
 import org.apache.ambari.server.actionmanager.HostRoleStatus;
 import org.apache.ambari.server.actionmanager.Request;
 import org.apache.ambari.server.actionmanager.Stage;
-import org.apache.ambari.server.agent.stomp.NamedTasksSubscriptions;
+import org.apache.ambari.server.api.stomp.NamedTasksSubscriptions;
 import org.apache.ambari.server.controller.internal.CalculatedStatus;
 import org.apache.ambari.server.events.NamedTaskUpdateEvent;
 import org.apache.ambari.server.events.RequestUpdateEvent;
@@ -149,17 +149,18 @@ public class TaskStatusListener {
         stagesWithReceivedTaskStatus.add(stageEntityPK);
         requestIdsWithReceivedTaskStatus.add(hostRoleCommand.getRequestId());
 
-        if (namedTasksSubscriptions.checkTaskId(reportedTaskId)) {
-          namedTasksToPublish.add(new NamedTaskUpdateEvent(reportedTaskId,
-              hostRoleCommand.getRequestId(),
-              hostRoleCommand.getHostName(),
-              hostRoleCommand.getEndTime(),
-              hostRoleCommand.getStatus(),
-              hostRoleCommand.getErrorLog(),
-              hostRoleCommand.getOutputLog(),
-              hostRoleCommand.getStderr(),
-              hostRoleCommand.getStdout(),
-              hostRoleCommand.getStructuredOut()));
+        NamedTaskUpdateEvent namedTaskUpdateEvent = new NamedTaskUpdateEvent(reportedTaskId,
+            hostRoleCommand.getRequestId(),
+            hostRoleCommand.getHostName(),
+            hostRoleCommand.getEndTime(),
+            hostRoleCommand.getStatus(),
+            hostRoleCommand.getErrorLog(),
+            hostRoleCommand.getOutputLog(),
+            hostRoleCommand.getStderr(),
+            hostRoleCommand.getStdout(),
+            hostRoleCommand.getStructuredOut());
+        if (namedTasksSubscriptions.checkTaskId(reportedTaskId)/* && !namedTaskUpdateEvent.equals()*/) {
+          namedTasksToPublish.add(namedTaskUpdateEvent);
         }
 
         if (!activeTasksMap.get(reportedTaskId).getStatus().equals(hostRoleCommand.getStatus())) {

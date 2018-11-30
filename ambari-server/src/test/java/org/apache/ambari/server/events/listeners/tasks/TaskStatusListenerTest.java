@@ -20,7 +20,9 @@ package org.apache.ambari.server.events.listeners.tasks;
 
 import static org.easymock.EasyMock.anyLong;
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expectLastCall;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +34,8 @@ import org.apache.ambari.server.RoleCommand;
 import org.apache.ambari.server.actionmanager.ExecutionCommandWrapperFactory;
 import org.apache.ambari.server.actionmanager.HostRoleCommand;
 import org.apache.ambari.server.actionmanager.HostRoleStatus;
-import org.apache.ambari.server.agent.stomp.NamedTasksSubscriptions;
+import org.apache.ambari.server.api.stomp.NamedTasksSubscriptions;
+import org.apache.ambari.server.events.NamedTaskUpdateEvent;
 import org.apache.ambari.server.events.TaskCreateEvent;
 import org.apache.ambari.server.events.TaskUpdateEvent;
 import org.apache.ambari.server.events.publishers.STOMPUpdatePublisher;
@@ -45,6 +48,7 @@ import org.apache.ambari.server.orm.entities.RequestEntity;
 import org.apache.ambari.server.orm.entities.StageEntity;
 import org.apache.ambari.server.orm.entities.StageEntityPK;
 import org.apache.ambari.server.state.ServiceComponentHostEvent;
+import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.junit.Assert;
@@ -166,6 +170,73 @@ public class TaskStatusListenerTest extends EasyMockSupport {
     Assert.assertNull(listener.getActiveRequestMap().get(1L));
 
     // verify request status = completed and display_status = skip_failed
+    verifyAll();
+  }
+
+  @Test
+  public void testNamedTasksEnabled() {
+    final Long taskId = 1L;
+    final Long requestId = 2L;
+    final HostRoleStatus status = HostRoleStatus.COMPLETED;
+    final String stderr = "gW$%SGFbhzsdfHBzdffdfd";
+    final String stdout = "gW$%gTESJ KHBjzdkfjbgv";
+    final String errorLog = " wTHT J YHKtjgsjgbvklfj";
+    final String outputLog = "546ky3kt%V$WYk4tgs5xzs";
+
+    NamedTasksSubscriptions namedTasksSubscriptions = new NamedTasksSubscriptions();
+    namedTasksSubscriptions.addTaskId("", taskId);
+
+    Capture<NamedTaskUpdateEvent> namedTaskUpdateEventCapture = Capture.newInstance();
+    STOMPUpdatePublisher stompUpdatePublisher = createStrictMock(STOMPUpdatePublisher.class);
+    stompUpdatePublisher.publish(capture(namedTaskUpdateEventCapture));
+    expectLastCall();
+
+    ServiceComponentHostEvent serviceComponentHostEvent = createNiceMock(ServiceComponentHostEvent.class);
+    HostDAO hostDAO = createNiceMock(HostDAO.class);
+
+    EasyMock.replay(hostDAO);
+    EasyMock.replay(serviceComponentHostEvent);
+
+    List<HostRoleCommand> updateHostRolesCommands = new ArrayList<>();
+    HostRoleCommand updateHostRoleCommand = new HostRoleCommand("hostName", Role.DATANODE,
+        serviceComponentHostEvent, RoleCommand.EXECUTE, hostDAO, executionCommandDAO, ecwFactory);
+    updateHostRoleCommand.setStatus(status);
+    updateHostRoleCommand.setRequestId(requestId);
+    updateHostRoleCommand.setStageId(3L);
+    updateHostRoleCommand.setTaskId(taskId);
+    updateHostRoleCommand.setStderr(stderr);
+    updateHostRoleCommand.setStdout(stdout);
+    updateHostRoleCommand.setErrorLog(errorLog);
+    updateHostRoleCommand.setOutputLog(outputLog);
+    updateHostRolesCommands.add(updateHostRoleCommand);
+
+    StageDAO stageDAO = createNiceMock(StageDAO.class);
+    RequestDAO requestDAO = createNiceMock(RequestDAO.class);
+
+    EasyMock.replay(stageDAO);
+    EasyMock.replay(requestDAO);
+    EasyMock.replay(stompUpdatePublisher);
+
+    TaskStatusListener listener = new TaskStatusListener(publisher, stageDAO, requestDAO, stompUpdatePublisher,
+        namedTasksSubscriptions);
+
+    // add
+    listener.getActiveTasksMap().put(taskId, updateHostRoleCommand);
+    listener.onTaskUpdateEvent(new TaskUpdateEvent(updateHostRolesCommands));
+
+    Assert.assertNotNull(namedTaskUpdateEventCapture.getValues());
+    Assert.assertEquals(1L, namedTaskUpdateEventCapture.getValues().size());
+
+    NamedTaskUpdateEvent capturedEvent = namedTaskUpdateEventCapture.getValue();
+
+    Assert.assertEquals(taskId, capturedEvent.getId());
+    Assert.assertEquals(requestId, capturedEvent.getRequestId());
+    Assert.assertEquals(status, capturedEvent.getStatus());
+    Assert.assertEquals(stderr, capturedEvent.getStderr());
+    Assert.assertEquals(stdout, capturedEvent.getStdout());
+    Assert.assertEquals(errorLog, capturedEvent.getErrorLog());
+    Assert.assertEquals(outputLog, capturedEvent.getOutLog());
+
     verifyAll();
   }
 

@@ -17,7 +17,6 @@
  */
 package org.apache.ambari.server.api.stomp;
 
-import org.apache.ambari.server.agent.stomp.NamedTasksSubscriptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
