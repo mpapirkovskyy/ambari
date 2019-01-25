@@ -35,7 +35,6 @@ import org.apache.ambari.server.orm.entities.ClusterEntity;
 import org.apache.ambari.server.orm.entities.PrivilegeEntity;
 import org.apache.ambari.server.orm.entities.RepositoryVersionEntity;
 import org.apache.ambari.server.orm.entities.UpgradeEntity;
-import org.apache.ambari.server.security.authorization.AuthorizationException;
 import org.apache.ambari.server.state.configgroup.ConfigGroup;
 import org.apache.ambari.server.state.repository.VersionDefinitionXml;
 import org.apache.ambari.server.state.scheduler.RequestExecution;
@@ -495,7 +494,7 @@ public interface Cluster {
    * @param id
    * @throws AmbariException
    */
-  void deleteConfigGroup(Long id) throws AmbariException, AuthorizationException;
+  void deleteConfigGroup(Long id) throws AmbariException;
 
   /**
    * Find all config groups associated with the give hostname
@@ -504,6 +503,13 @@ public interface Cluster {
    */
   Map<Long, ConfigGroup> getConfigGroupsByHostname(String hostname)
       throws AmbariException;
+
+  /**
+   * Find all config groups associated with the give service name
+   * @param serviceName
+   * @return Map of config group id to config group
+   */
+  Map<Long, ConfigGroup> getConfigGroupsByServiceName(String serviceName);
 
   /**
    * Add a @RequestExecution to the cluster
