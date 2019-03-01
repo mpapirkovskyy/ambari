@@ -36,7 +36,8 @@ module.exports = Em.Route.extend(App.RouterRedirections, {
                 router.get('mainController').initialize();
               } else {
                 if (router.get('clusterInstallCompleted')) {
-                  App.router.get('clusterController').loadClientServerClockDistance().done(function () {
+                  App.router.get('wizardWatcherController').getUser();
+                    App.router.get('clusterController').loadClientServerClockDistance().done(function () {
                     if (!App.get('isOnlyViewUser')) {
                       App.router.get('clusterController').checkDetailedRepoVersion().done(function () {
                         router.get('mainController').initialize();
@@ -52,6 +53,7 @@ module.exports = Em.Route.extend(App.RouterRedirections, {
                 }
                 else {
                   Em.run.next(function () {
+                    App.router.get('wizardWatcherController').getUser();
                     App.clusterStatus.updateFromServer().complete(function () {
                       var currentClusterStatus = App.clusterStatus.get('value');
                       if (router.get('currentState.parentState.name') !== 'views' && router.get('currentState.parentState.name') !== 'view'

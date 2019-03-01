@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router, transition) {
     var removeHawqStandbyWizardController = router.get('removeHawqStandbyWizardController');
-    removeHawqStandbyWizardController.dataLoading().done(function () {
+    var self = this;
+    removeHawqStandbyWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, removeHawqStandbyWizardController)) {
+        return;
+      }
       App.router.set('mainServiceItemController.content', App.Service.find().findProperty('serviceName', 'HAWQ'));
     });
     Em.run.next(function() {

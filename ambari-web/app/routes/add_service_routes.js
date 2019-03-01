@@ -24,9 +24,15 @@ module.exports = App.WizardRoute.extend({
   route: '/service/add',
 
   enter: function (router) {
+    var addServiceController = router.get('addServiceController');
+    var self = this;
+  
     if (App.isAuthorized('SERVICE.ADD_DELETE_SERVICES') && App.supports.enableAddDeleteServices) {
       // `getSecurityStatus` call is required to retrieve information related to kerberos type: Manual or automated kerberos
-      router.get('mainController').isLoading.call(router.get('clusterController'),'isClusterNameLoaded').done(function () {
+      addServiceController.dataLoading().done(function() {
+        if (!self.canUserOpenWizard(router, addServiceController)) {
+          return;
+        }
         App.router.get('mainAdminKerberosController').getSecurityStatus().always(function () {
           Em.run.next(function () {
             var addServiceController = router.get('addServiceController');
@@ -97,9 +103,9 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       App.logger.setTimer(consoleMsg.format(1));
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('1');
-      controller.set('hideBackButton', true);
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('1');
+        controller.set('hideBackButton', true);
         controller.loadAllPriorSteps().done(function () {
           var wizardStep4Controller = router.get('wizardStep4Controller');
           wizardStep4Controller.set('wizardController', controller);
@@ -136,10 +142,10 @@ module.exports = App.WizardRoute.extend({
       App.logger.setTimer(consoleMsg.format(2));
       var controller = router.get('addServiceController');
       var wizardStep2Controller = router.get('wizardStep5Controller');
-      controller.setCurrentStep('2');
-      controller.set('hideBackButton', false);
-      wizardStep2Controller.set('isInitialLayout', true);
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('2');
+        controller.set('hideBackButton', false);
+        wizardStep2Controller.set('isInitialLayout', true);
         controller.loadAllPriorSteps().done(function () {
           App.logger.logTimerIfMoreThan(consoleMsg.format(2));
           wizardStep2Controller.set('wizardController', controller);
@@ -170,8 +176,8 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       App.logger.setTimer(consoleMsg.format(3));
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('3');
       router.get('mainController').isLoading.call(router.get('clusterController'), 'isServiceContentFullyLoaded').done(function () {
+        controller.setCurrentStep('3');
         controller.loadAllPriorSteps().done(function () {
           var wizardStep6Controller = router.get('wizardStep6Controller');
           wizardStep6Controller.set('wizardController', controller);
@@ -219,8 +225,8 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       App.logger.setTimer(consoleMsg.format(4));
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('4');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('4');
         var wizardStep7Controller = router.get('wizardStep7Controller');
         controller.loadAllPriorSteps().done(function () {
           wizardStep7Controller.getConfigTags();
@@ -267,8 +273,8 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       App.logger.setTimer(consoleMsg.format(5));
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('5');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('5');
         var kerberosStep4Controller = router.get('kerberosWizardStep4Controller');
         controller.loadAllPriorSteps().done(function () {
           kerberosStep4Controller.set('wizardController', controller);
@@ -309,6 +315,7 @@ module.exports = App.WizardRoute.extend({
       var controller = router.get('addServiceController');
       controller.setCurrentStep('6');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('6');
         controller.loadAllPriorSteps().done(function () {
           var wizardStep8Controller = router.get('wizardStep8Controller');
           wizardStep8Controller.set('wizardController', controller);
@@ -352,11 +359,9 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router, context) {
       App.logger.setTimer(consoleMsg.format(7));
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('7');
-      if (!App.get('testMode')) {              //if test mode is ON don't disable prior steps link.
-        controller.setLowerStepsDisable(7);
-      }
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('7');
+        controller.setLowerStepsDisable(7);
         controller.loadAllPriorSteps().done(function () {
           var wizardStep9Controller = router.get('wizardStep9Controller');
           wizardStep9Controller.set('wizardController', controller);
@@ -401,9 +406,9 @@ module.exports = App.WizardRoute.extend({
     route: '/step8',
     connectOutlets: function (router, context) {
       var controller = router.get('addServiceController');
-      controller.setCurrentStep('8');
-      controller.setLowerStepsDisable(8);
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('8');
+        controller.setLowerStepsDisable(8);
         controller.loadAllPriorSteps().done(function () {
           controller.connectOutlet('wizardStep10', controller.get('content'));
         });

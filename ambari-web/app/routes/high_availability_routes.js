@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router) {
     var highAvailabilityWizardController = router.get('highAvailabilityWizardController');
-    highAvailabilityWizardController.dataLoading().done(function () {
+    var self = this;
+    highAvailabilityWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, highAvailabilityWizardController)) {
+        return;
+      }
         App.router.get('updateController').set('isWorking', false);
         var popup = App.ModalPopup.show({
           classNames: ['full-width-modal'],

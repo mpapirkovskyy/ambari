@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router) {
     var manageJournalNodeWizardController = router.get('manageJournalNodeWizardController');
+    var self = this;
     manageJournalNodeWizardController.dataLoading().done(function () {
+      if (!self.canUserOpenWizard(router, manageJournalNodeWizardController)) {
+        return;
+      }
       App.router.get('updateController').set('isWorking', false);
       var popup = App.ModalPopup.show({
         classNames: ['full-width-modal'],

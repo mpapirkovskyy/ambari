@@ -20,10 +20,14 @@ var App = require('app');
 module.exports = App.WizardRoute.extend({
   route: '/enable',
   enter: function (router) {
+    var kerberosWizardController = router.get('kerberosWizardController');
+    var self = this;
     router.get('mainController').dataLoading().done(function() {
       return App.clusterStatus.updateFromServer();
-    }).done(function () {
-      var kerberosWizardController = router.get('kerberosWizardController');
+    }).done(function() {
+      if (!self.canUserOpenWizard(router, kerberosWizardController)) {
+        return;
+      }
       App.router.get('updateController').set('isWorking', false);
       var popup = App.ModalPopup.show({
         classNames: ['full-width-modal'],
@@ -216,9 +220,8 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       var controller = router.get('kerberosWizardController');
       var step4Controller = router.get('kerberosWizardStep4Controller');
-      controller.setCurrentStep(4);
       controller.dataLoading().done(function () {
-        router.get('kerberosWizardController').setCurrentStep('4');
+        controller.setCurrentStep('4');
         controller.loadAllPriorSteps().done(function() {
           controller.setLowerStepsDisable(4);
           step4Controller.set('wizardController', controller);
@@ -257,7 +260,7 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       var controller = router.get('kerberosWizardController');
       controller.dataLoading().done(function () {
-        router.get('kerberosWizardController').setCurrentStep('5');
+        controller.setCurrentStep('5');
         controller.setLowerStepsDisable(5);
         controller.loadAllPriorSteps().done(function() {
           controller.connectOutlet('kerberosWizardStep5', controller.get('content'));
@@ -297,7 +300,7 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       var controller = router.get('kerberosWizardController');
       controller.dataLoading().done(function () {
-        router.get('kerberosWizardController').setCurrentStep('6');
+        controller.setCurrentStep('6');
         controller.setLowerStepsDisable(6);
         controller.loadAllPriorSteps().done(function() {
           controller.connectOutlet('kerberosWizardStep6', controller.get('content'));
@@ -325,7 +328,7 @@ module.exports = App.WizardRoute.extend({
       var controller = router.get('kerberosWizardController');
       var step7Controller = router.get('kerberosWizardStep7Controller');
       controller.dataLoading().done(function () {
-        router.get('kerberosWizardController').setCurrentStep('7');
+        controller.setCurrentStep('7');
         controller.setLowerStepsDisable(7);
         controller.loadAllPriorSteps().done(function() {
           step7Controller.setRequest();
@@ -348,7 +351,7 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router) {
       var controller = router.get('kerberosWizardController');
       controller.dataLoading().done(function () {
-        router.get('kerberosWizardController').setCurrentStep('8');
+        controller.setCurrentStep('8');
         controller.setLowerStepsDisable(8);
         controller.loadAllPriorSteps().done(function() {
           controller.connectOutlet('kerberosWizardStep8', controller.get('content'));

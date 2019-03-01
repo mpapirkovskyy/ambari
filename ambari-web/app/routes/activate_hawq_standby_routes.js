@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router, transition) {
     var activateHawqStandbyWizardController = router.get('activateHawqStandbyWizardController');
-    activateHawqStandbyWizardController.dataLoading().done(function () {
+    var self = this;
+    activateHawqStandbyWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, activateHawqStandbyWizardController)) {
+        return;
+      }
       App.router.set('mainServiceItemController.content', App.Service.find().findProperty('serviceName', 'HAWQ'));
       App.router.get('updateController').set('isWorking', false);
       var popup = App.ModalPopup.show({
@@ -38,20 +42,7 @@ module.exports = App.WizardRoute.extend({
         updateClusterStatus: function() {
           var controller = router.get('activateHawqStandbyWizardController');
           router.get('updateController').set('isWorking', true);
-          activateHawqStandbyWizardController.finish();
-          App.clusterStatus.setClusterStatus({
-            clusterName: App.router.getClusterName(),
-            clusterState: 'DEFAULT',
-            localdb: App.db.data
-          }, {
-            alwaysCallback: function () {
-              controller.get('popup').hide();
-              router.transitionTo('main.services.index');
-              Em.run.next(function() {
-                location.reload();
-              });
-            }
-          });
+          controller.resetOnClose(controller, 'main.services.index');
         },
 
         onClose: function () {
@@ -160,20 +151,7 @@ module.exports = App.WizardRoute.extend({
     },
     next: function (router) {
       var controller = router.get('activateHawqStandbyWizardController');
-      controller.finish();
-      App.clusterStatus.setClusterStatus({
-        clusterName: controller.get('content.cluster.name'),
-        clusterState: 'DEFAULT',
-        localdb: App.db.data
-      }, {
-        alwaysCallback: function () {
-          controller.get('popup').hide();
-          router.transitionTo('main.services.index');
-          Em.run.next(function () {
-            location.reload();
-          });
-        }
-      });
+      controller.resetOnClose(controller, 'main.services.index');
     }
   })
 

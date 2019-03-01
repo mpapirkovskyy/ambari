@@ -825,25 +825,27 @@ App.WizardController = Em.Controller.extend(App.LocalStorage, App.ThemesMappingM
     this.setDBProperty('slaveComponentHosts', slaveComponentHosts);
     this.set('content.slaveComponentHosts', slaveComponentHosts);
   },
+  
+  dataLoadingDeferred: $.Deferred(),
 
   /**
    * Return true if cluster data is loaded and false otherwise.
    * This is used for all wizard controllers except for installer wizard.
    */
   dataLoading: function () {
-    var dfd = $.Deferred();
     this.connectOutlet('loading');
-    if (App.router.get('clusterController.isLoaded')) {
-      dfd.resolve();
+    var self = this;
+    if (App.router.get('clusterController.isLoaded') && App.router.get('wizardWatcherController').get('isLoaded')) {
+      this.get('dataLoadingDeferred').resolve();
     } else {
-      var interval = setInterval(function () {
-        if (App.router.get('clusterController.isLoaded')) {
-          dfd.resolve();
+      var interval = setInterval(function() {
+        if (App.router.get('clusterController.isLoaded') && App.router.get('wizardWatcherController').get('isLoaded')) {
+          self.get('dataLoadingDeferred').resolve();
           clearInterval(interval);
         }
       }, 50);
     }
-    return dfd.promise();
+    return this.get('dataLoadingDeferred').promise();
   },
 
   /**

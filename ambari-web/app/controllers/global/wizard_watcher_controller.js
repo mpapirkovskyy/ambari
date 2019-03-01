@@ -36,6 +36,11 @@ App.WizardWatcherController = Em.Controller.extend(App.UserPref, {
    * @type {string|null}
    */
   controllerName: null,
+  
+  /**
+   * @type {boolean}
+   */
+  isLoaded: false,
 
   /**
    * define whether Wizard is running
@@ -96,6 +101,7 @@ App.WizardWatcherController = Em.Controller.extend(App.UserPref, {
       this.set('wizardUser', data.userName);
       this.set('controllerName', data.controllerName);
     }
+    this.set('isLoaded', true);
   },
 
   getUserPrefErrorCallback: function () {

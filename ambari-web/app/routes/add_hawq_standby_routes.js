@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router, transition) {
     var addHawqStandbyWizardController = router.get('addHawqStandbyWizardController');
-    addHawqStandbyWizardController.dataLoading().done(function () {
+    var self = this;
+    addHawqStandbyWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, addHawqStandbyWizardController)) {
+        return;
+      }
       //Set HAWQ as current service
       App.router.set('mainServiceItemController.content', App.Service.find().findProperty('serviceName', 'HAWQ'));
       App.router.get('updateController').set('isWorking', false);

@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router) {
     var rAHighAvailabilityWizardController = router.get('rAHighAvailabilityWizardController');
-    rAHighAvailabilityWizardController.dataLoading().done(function () {
+    var self = this;
+    rAHighAvailabilityWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, rAHighAvailabilityWizardController)) {
+        return;
+      }
       //Set RANGER as current service
       App.router.set('mainServiceItemController.content', App.Service.find().findProperty('serviceName', 'RANGER'));
     });
@@ -136,7 +140,7 @@ module.exports = App.WizardRoute.extend({
       });
     },
     next: function (router) {
-      router.transitionTo('step4');iiii
+      router.transitionTo('step4');
     },
     back: function (router) {
       router.transitionTo('step2');

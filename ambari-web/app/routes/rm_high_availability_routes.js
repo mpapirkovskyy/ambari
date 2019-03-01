@@ -23,7 +23,11 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router, transition) {
     var rMHighAvailabilityWizardController = router.get('rMHighAvailabilityWizardController');
-    rMHighAvailabilityWizardController.dataLoading().done(function () {
+    var self = this;
+    rMHighAvailabilityWizardController.dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, rMHighAvailabilityWizardController)) {
+        return;
+      }
       //Set YARN as current service
       App.router.set('mainServiceItemController.content', App.Service.find().findProperty('serviceName', 'YARN'));
       App.router.get('updateController').set('isWorking', false);

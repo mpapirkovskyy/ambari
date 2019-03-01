@@ -90,6 +90,11 @@ App.clusterStatus = Em.Object.create(App.UserPref, {
    * @property {App.ModalPopup|null}
    */
   persistErrorModal: null,
+  
+  /**
+   * @type {boolean}
+   */
+  isLoaded: false,
 
   /**
    * General info about cluster
@@ -165,6 +170,7 @@ App.clusterStatus = Em.Object.create(App.UserPref, {
     // after upgrading ambari, loading local storage data from the "persist" data saved via an older version of
     // Ambari can result in missing namespaces that are defined in the new version of Ambari.
     App.db.mergeStorage();
+    this.set('isLoaded', true);
   },
 
   /**

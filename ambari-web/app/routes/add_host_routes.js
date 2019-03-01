@@ -28,9 +28,12 @@ module.exports = App.WizardRoute.extend({
 
   enter: function (router) {
     var self = this;
-    router.get('mainController').dataLoading().done(function () {
+    var addHostController = router.get('addHostController');
+    router.get('mainController').dataLoading().done(function() {
+      if (!self.canUserOpenWizard(router, addHostController)) {
+        return;
+      }
       Ember.run.next(function () {
-        var addHostController = router.get('addHostController');
         App.router.get('updateController').set('isWorking', false);
         var popup = App.ModalPopup.show({
           classNames: ['full-width-modal'],
@@ -97,9 +100,9 @@ module.exports = App.WizardRoute.extend({
     route: '/step1',
     connectOutlets: function (router) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('1');
-      controller.set('hideBackButton', true);
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('1');
+        controller.set('hideBackButton', true);
         controller.loadAllPriorSteps();
         var wizardStep2Controller = router.get('wizardStep2Controller');
         wizardStep2Controller.set('wizardController', controller);
@@ -131,8 +134,8 @@ module.exports = App.WizardRoute.extend({
     route: '/step2',
     connectOutlets: function (router) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('2');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('2');
         controller.loadAllPriorSteps();
         var wizardStep3Controller = router.get('wizardStep3Controller');
         wizardStep3Controller.set('wizardController', controller);
@@ -175,8 +178,8 @@ module.exports = App.WizardRoute.extend({
     route: '/step3',
     connectOutlets: function (router, context) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('3');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('3');
         controller.loadAllPriorSteps();
         var wizardStep6Controller = router.get('wizardStep6Controller');
         wizardStep6Controller.set('wizardController', controller);
@@ -213,8 +216,8 @@ module.exports = App.WizardRoute.extend({
     connectOutlets: function (router, context) {
       var controller = router.get('addHostController');
       var addHostStep4Controller = router.get('addHostStep4Controller');
-      controller.setCurrentStep('4');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('4');
         addHostStep4Controller.loadConfigGroups();
         addHostStep4Controller.set('isConfigGroupLoaded', false);
         addHostStep4Controller.configGroupsLoading().done(function () {
@@ -239,8 +242,8 @@ module.exports = App.WizardRoute.extend({
     route: '/step5',
     connectOutlets: function (router, context) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('5');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('5');
         router.get('mainController').isLoading.call(router.get('clusterController'), 'isServiceContentFullyLoaded').done(function () {
           controller.loadAllPriorSteps();
           controller.getServiceConfigGroups();
@@ -284,8 +287,8 @@ module.exports = App.WizardRoute.extend({
     route: '/step6',
     connectOutlets: function (router, context) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('6');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('6');
         var wizardStep9Controller = router.get('wizardStep9Controller');
         wizardStep9Controller.set('wizardController', controller);
         controller.loadAllPriorSteps();
@@ -342,8 +345,8 @@ module.exports = App.WizardRoute.extend({
     route: '/step7',
     connectOutlets: function (router, context) {
       var controller = router.get('addHostController');
-      controller.setCurrentStep('7');
       controller.dataLoading().done(function () {
+        controller.setCurrentStep('7');
         controller.loadAllPriorSteps();
         var wizardStep10Controller = router.get('wizardStep10Controller');
         wizardStep10Controller.set('wizardController', controller);

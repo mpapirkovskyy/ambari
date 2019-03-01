@@ -45,7 +45,37 @@ App.WizardRoute = Em.Route.extend({
 
   isRoutable: function() {
     return typeof this.get('route') === 'string' && App.router.get('loggedIn');
-  }.property('App.router.loggedIn')
+  }.property('App.router.loggedIn'),
+  
+  /**
+   *
+   * @param router
+   * @param controller
+   * @returns {boolean}
+   */
+  canUserOpenWizard: function(router, controller) {
+    var runningWizardControllerName = router.get('wizardWatcherController').get('controllerName');
+    var wizardUser = router.get('wizardWatcherController').get('wizardUser');
+    var isWizardWasNotOpenedBefore = !runningWizardControllerName || runningWizardControllerName !== controller.get('name');
+    var isDifferentUser = wizardUser && (router.get('loginName') !== wizardUser);
+    
+    var previousRouteWasWizardStep = router.currentState.name.contains('step');
+    
+    if (isDifferentUser || (previousRouteWasWizardStep && isWizardWasNotOpenedBefore)) {
+      // When user trying go to wizard that wasn't started then should be redirected to dashboard
+      router.transitionTo('main.dashboard.index');
+      return false;
+    } else {
+      if (!previousRouteWasWizardStep) {
+        // User starting wizard
+        Em.run.next(function() {
+          router.transitionTo('step1');
+          controller.setCurrentStep('1');
+        });
+      }
+    }
+    return true;
+  }
 
 });
 
