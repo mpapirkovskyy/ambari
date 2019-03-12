@@ -966,4 +966,21 @@ public class ConfigurationTest {
       // This is expected
     }
   }
+
+  @Test
+  public void testStrictTransportSecurityHTTPResponseHeader() {
+    Properties properties = new Properties();
+    properties.put(Configuration.HTTP_STRICT_TRANSPORT_HEADER_VALUE.getKey(), "max-age=0; includeSubDomains");
+    assertEquals(0L, new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderMaxAge());
+    assertEquals(true, new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderIncludeSubdomains());
+
+    properties.put(Configuration.HTTP_STRICT_TRANSPORT_HEADER_VALUE.getKey(), "max-age=0");
+    assertEquals(0L, new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderMaxAge());
+    assertEquals(false, new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderIncludeSubdomains());
+
+    properties.put(Configuration.HTTP_STRICT_TRANSPORT_HEADER_VALUE.getKey(), "max-dfs=0");
+    assertEquals(Configuration.STRICT_TRANSPORT_SECURITY_MAX_AGE_DEFAULT,
+        new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderMaxAge());
+    assertEquals(false, new Configuration(properties).getStrictTransportSecurityHTTPResponseHeaderIncludeSubdomains());
+  }
 }

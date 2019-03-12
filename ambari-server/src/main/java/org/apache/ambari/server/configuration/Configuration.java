@@ -49,6 +49,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.ambari.annotations.Experimental;
 import org.apache.ambari.annotations.ExperimentalFeature;
@@ -155,6 +157,11 @@ public class Configuration {
   private static final String HTML_BREAK_TAG = "<br/>";
 
   private static final String AGENT_CONFIGS_DEFAULT_SECTION = "agentConfig";
+
+  private static final Pattern MAX_AGE_PATTERN = Pattern.compile("max-age=([\\d]*)");
+
+  public static final long STRICT_TRANSPORT_SECURITY_MAX_AGE_DEFAULT = 31536000L;
+  public static final String STRICT_TRANSPORT_SECURITY_INCLUDE_SUBDOMAINS_VALUE = "includeSubDomains";
 
   /**
    * Used to determine which repository validation strings should be used
@@ -2182,7 +2189,7 @@ public class Configuration {
    */
   @Markdown(description = "When using SSL, this will be used to set the `Strict-Transport-Security` response header.")
   public static final ConfigurationProperty<String> HTTP_STRICT_TRANSPORT_HEADER_VALUE = new ConfigurationProperty<>(
-      "http.strict-transport-security", "max-age=31536000");
+      "http.strict-transport-security", "max-age=" + STRICT_TRANSPORT_SECURITY_MAX_AGE_DEFAULT);
 
   /**
    * The value that will be used to set the {@code X-Frame-Options} HTTP response header.
@@ -3586,6 +3593,29 @@ public class Configuration {
    */
   public String getStrictTransportSecurityHTTPResponseHeader() {
     return getProperty(HTTP_STRICT_TRANSPORT_HEADER_VALUE);
+  }
+
+  /**
+   * Parses <code>Strict-Transport-Security</code> value and retrieves max-age directive value.
+   * @return max-age value in seconds.
+   */
+  public long getStrictTransportSecurityHTTPResponseHeaderMaxAge() {
+    String headerValue = getStrictTransportSecurityHTTPResponseHeader();
+    Matcher maxAgeMatcher = MAX_AGE_PATTERN.matcher(headerValue);
+    long maxAge = STRICT_TRANSPORT_SECURITY_MAX_AGE_DEFAULT;
+    if (maxAgeMatcher.find()) {
+      maxAge = Long.parseLong(maxAgeMatcher.group(1));
+    }
+    return maxAge;
+  }
+
+  /**
+   * Parses <code>Strict-Transport-Security</code> value and retrieves subdomains present necessary.
+   * @return true when shubdomains should be included.
+   */
+  public boolean getStrictTransportSecurityHTTPResponseHeaderIncludeSubdomains() {
+    return StringUtils.contains(getStrictTransportSecurityHTTPResponseHeader(),
+        STRICT_TRANSPORT_SECURITY_INCLUDE_SUBDOMAINS_VALUE);
   }
 
   /**
