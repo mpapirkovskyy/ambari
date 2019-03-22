@@ -37,6 +37,16 @@ public class AvoidTransactionalOnPrivateMethodsCheck extends AbstractCheck {
   }
 
   @Override
+  public int[] getAcceptableTokens() {
+    return getDefaultTokens();
+  }
+
+  @Override
+  public int[] getRequiredTokens() {
+    return getDefaultTokens();
+  }
+
+  @Override
   public void visitToken(DetailAST ast) {
     DetailAST modifiers = ast.findFirstToken(TokenTypes.MODIFIERS);
     if (modifiers.findFirstToken(TokenTypes.LITERAL_PRIVATE) != null) {
