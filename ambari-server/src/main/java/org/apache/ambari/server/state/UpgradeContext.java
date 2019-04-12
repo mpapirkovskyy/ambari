@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1324,7 +1325,7 @@ public class UpgradeContext {
     private List<HostOrderItem> extractHostOrderItemsFromRequest(Map<String, Object> requestMap)
         throws AmbariException {
       // ewwww
-      Set<Map<String, List<String>>> hostsOrder = (Set<Map<String, List<String>>>) requestMap.get(
+      Set<Map<String, Object>> hostsOrder = (Set<Map<String, Object>>) requestMap.get(
           UPGRADE_HOST_ORDERED_HOSTS);
 
       if (CollectionUtils.isEmpty(hostsOrder)) {
@@ -1337,11 +1338,11 @@ public class UpgradeContext {
 
       // extract all of the hosts so that we can ensure they are all accounted
       // for
-      Iterator<Map<String, List<String>>> iterator = hostsOrder.iterator();
+      Iterator<Map<String, Object>> iterator = hostsOrder.iterator();
       while (iterator.hasNext()) {
-        Map<String, List<String>> grouping = iterator.next();
-        List<String> hosts = grouping.get("hosts");
-        List<String> serviceChecks = grouping.get("service_checks");
+        Map<String, Object> grouping = iterator.next();
+        List<String> hosts = (List<String>) grouping.get("hosts");
+        Set<Map<String, List<String>>> serviceChecks = (LinkedHashSet<Map<String, List<String>>>) grouping.get("service_checks");
 
         if (CollectionUtils.isEmpty(hosts) && CollectionUtils.isEmpty(serviceChecks)) {
           throw new AmbariException(String.format(
@@ -1354,7 +1355,20 @@ public class UpgradeContext {
         }
 
         if (CollectionUtils.isNotEmpty(serviceChecks)) {
-          hostOrderItems.add(new HostOrderItem(HostOrderActionType.SERVICE_CHECK, hosts, serviceChecks));
+          for (Map<String, List<String>> checkEntry : serviceChecks) {
+            List<String> checkHosts = checkEntry.get("hosts");
+            List<String> services = checkEntry.get("services");
+            if (CollectionUtils.isEmpty(checkHosts) && CollectionUtils.isEmpty(services)) {
+              throw new AmbariException(String.format(
+                  "Service checks map should contain at least not empty list of services"));
+            }
+            // apply check for all hosts take part in upgrade step
+            if (CollectionUtils.isEmpty(checkHosts)) {
+              checkHosts = hosts;
+            }
+            hostOrderItems.add(new HostOrderItem(HostOrderActionType.SERVICE_CHECK, checkHosts,
+                services));
+          }
         }
       }
 
