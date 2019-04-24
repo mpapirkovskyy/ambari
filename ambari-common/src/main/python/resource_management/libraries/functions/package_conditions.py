@@ -19,7 +19,7 @@ limitations under the License.
 Ambari Agent
 
 """
-__all__ = ["should_install_phoenix", "should_install_ams_collector", "should_install_ams_grafana",
+__all__ = ["should_install_lzo", "should_install_phoenix", "should_install_ams_collector", "should_install_ams_grafana",
            "should_install_mysql", "should_install_ranger_tagsync"]
 
 import os
@@ -28,6 +28,7 @@ from resource_management.libraries.functions import StackFeature
 from resource_management.libraries.functions.default import default
 from resource_management.libraries.functions.stack_features import check_stack_feature
 from resource_management.libraries.functions.version import format_stack_version
+from resource_management.libraries.functions.lzo_utils import should_install_lzo as utils_should_install_lzo
 
 def _has_local_components(config, components, indicator_function = any):
   if 'role' not in config:
@@ -43,6 +44,9 @@ def _has_local_components(config, components, indicator_function = any):
 
 def _has_applicable_local_component(config, components):
   return _has_local_components(config, components, any)
+
+def should_install_lzo():
+  return utils_should_install_lzo()
 
 def should_install_phoenix():
   phoenix_hosts = default('/clusterHostInfo/phoenix_query_server_hosts', [])
