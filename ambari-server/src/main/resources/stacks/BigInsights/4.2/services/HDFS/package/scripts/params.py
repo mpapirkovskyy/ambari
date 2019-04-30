@@ -123,6 +123,12 @@ update_exclude_file_only = default("/commandParams/update_exclude_file_only",Fal
 
 klist_path_local = functions.get_klist_path()
 kinit_path_local = functions.get_kinit_path()
+
+cluster_admin_principal = default('/configurations/cluster-env/clusteradmin_principal_name', None)
+cluster_admin_keytab = default('/configurations/cluster-env/clusteradmin_keytab', None)
+cluster_admin_user = default('/configurations/cluster-env/clusteradmin', None)
+cluster_admin_defined = cluster_admin_principal is not None and cluster_admin_keytab is not None and cluster_admin_user is not None
+
 #hosts
 hostname = config["hostname"]
 rm_host = default("/clusterHostInfo/rm_host", [])
