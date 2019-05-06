@@ -173,6 +173,11 @@ public class DDLProxy {
       public boolean apply(@Nullable DatabaseInfo input) {
         return input.getName().equalsIgnoreCase(databaseId);
       }
+/*
+      @Override
+      public boolean test(@NullableDecl String input) {
+        return false;
+      }*/
     }).first();
   }
 
@@ -222,6 +227,11 @@ public class DDLProxy {
       public boolean apply(@Nullable TableInfo input) {
         return input.getName().equalsIgnoreCase(tableName);
       }
+
+      /*@Override
+      public boolean test(@NullableDecl String input) {
+        return false;
+      }*/
     }).first();
   }
 

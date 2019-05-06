@@ -97,7 +97,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>24.1.1-jre</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -193,7 +192,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.0</version>
+          <version>3.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-dependency-plugin</artifactId>
