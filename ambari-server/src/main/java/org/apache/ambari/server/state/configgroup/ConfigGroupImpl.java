@@ -420,7 +420,7 @@ public class ConfigGroupImpl implements ConfigGroup {
           Service service = cluster.getService(serviceName);
 
           config = configFactory.createNew(service.getDesiredStackId(), cluster, config.getType(),
-              config.getTag(), config.getProperties(), config.getPropertiesAttributes());
+              config.getTag(), config.getProperties(), config.getPropertiesAttributes(), true);
 
           entry.setValue(config);
 
