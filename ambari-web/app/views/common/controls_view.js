@@ -573,9 +573,9 @@ App.ServiceConfigRadioButtons = Ember.View.extend(App.ServiceConfigCalculateId, 
     var rangerService = App.StackService.find().findProperty('serviceName', 'RANGER');
     var rangerVersion = rangerService ? rangerService.get('serviceVersion') : '';
     if (rangerVersion && rangerVersion.split('.')[0] < 1 && rangerVersion.split('.')[1] < 5) {
-      return ['DB_FLAVOR', 'authentication_method'];
+      return ['DB_FLAVOR', 'authentication_method', 'hive_security_authorization'];
     }
-    return ['ranger.authentication.method'];
+    return ['ranger.authentication.method', 'hive_security_authorization'];
   }.property('App.currentStackName'),
 
   serviceConfig: null,

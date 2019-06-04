@@ -389,32 +389,32 @@ describe('App.ServiceConfigRadioButtons', function () {
       {
         title: 'Should return properties for old version of Ranger',
         version: '0.1',
-        result: ['DB_FLAVOR', 'authentication_method']
+        result: ['DB_FLAVOR', 'authentication_method', 'hive_security_authorization']
       },
       {
         title: 'Should return properties for old version of Ranger',
         version: '0.4.0',
-        result: ['DB_FLAVOR', 'authentication_method']
+        result: ['DB_FLAVOR', 'authentication_method', 'hive_security_authorization']
       },
       {
         title: 'Should return properties for old version of Ranger',
         version: '0.4.9',
-        result: ['DB_FLAVOR', 'authentication_method']
+        result: ['DB_FLAVOR', 'authentication_method', 'hive_security_authorization']
       },
       {
         title: 'Should return properties for new version of Ranger',
         version: '0.5.0',
-        result: ['ranger.authentication.method']
+        result: ['ranger.authentication.method', 'hive_security_authorization']
       },
       {
         title: 'Should return properties for new version of Ranger',
         version: '1.0.0',
-        result: ['ranger.authentication.method']
+        result: ['ranger.authentication.method', 'hive_security_authorization']
       },
       {
         title: 'Should return properties for new version of Ranger',
         version: '0.5.0.1',
-        result: ['ranger.authentication.method']
+        result: ['ranger.authentication.method', 'hive_security_authorization']
       }
     ];
 

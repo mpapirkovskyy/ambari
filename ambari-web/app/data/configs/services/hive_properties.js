@@ -447,6 +447,25 @@ module.exports = [
   },
   {
     "category": "General",
+    "filename": "hive-env.xml",
+    "name": "hive_security_authorization",
+    "serviceName": "HIVE",
+    "displayType": "radio button",
+    "options": [
+      {
+        "displayName": "None"
+      },
+      {
+        "displayName": "SQLStdAuth"
+      },
+      {
+        "displayName": "Ranger",
+      }
+    ],
+    "radioName": "hive-authorization"
+  },
+  {
+    "category": "General",
     "filename": "hive-site.xml",
     "name": "hive.server2.enable.doAs",
     "serviceName": "HIVE"
