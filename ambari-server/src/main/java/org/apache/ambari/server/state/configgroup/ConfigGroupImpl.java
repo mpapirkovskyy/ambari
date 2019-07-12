@@ -419,7 +419,7 @@ public class ConfigGroupImpl implements ConfigGroup {
           String serviceName = getServiceName();
           Service service = cluster.getService(serviceName);
 
-          config = configFactory.createNew(service.getDesiredStackId(), cluster, config.getType(),
+          config = configFactory.createNew(service.getDesiredStackId(), config.getType(), cluster,
               config.getTag(), config.getProperties(), config.getPropertiesAttributes(), true);
 
           entry.setValue(config);
