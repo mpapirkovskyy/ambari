@@ -17,6 +17,7 @@
  */
 package org.apache.ambari.server.agent.stomp;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.ambari.server.AmbariException;
@@ -24,6 +25,7 @@ import org.apache.ambari.server.events.AgentConfigsUpdateEvent;
 import org.apache.ambari.server.events.publishers.AmbariEventPublisher;
 import org.apache.ambari.server.state.Clusters;
 import org.apache.ambari.server.state.ConfigHelper;
+import org.apache.ambari.server.state.DesiredConfig;
 import org.apache.ambari.server.state.Host;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -54,8 +56,17 @@ public class AgentConfigsHolder extends AgentHostDataHolder<AgentConfigsUpdateEv
     return configHelper.getHostActualConfigs(hostId);
   }
 
+  public AgentConfigsUpdateEvent getCurrentData(Long hostId, Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs) throws AmbariException {
+    return configHelper.getHostActualConfigs(hostId, clustersDesiredConfigs);
+  }
+
   public AgentConfigsUpdateEvent getCurrentDataExcludeCluster(Long hostId, Long clusterId) throws AmbariException {
     return configHelper.getHostActualConfigsExcludeCluster(hostId, clusterId);
+  }
+
+  public AgentConfigsUpdateEvent getCurrentDataExcludeCluster(Long hostId, Long clusterId,
+                                                              Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs) throws AmbariException {
+    return configHelper.getHostActualConfigsExcludeCluster(hostId, clusterId, clustersDesiredConfigs);
   }
 
   @Override
@@ -73,8 +84,9 @@ public class AgentConfigsHolder extends AgentHostDataHolder<AgentConfigsUpdateEv
       }
     }
 
+    Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs = configHelper.getClustersDesiredConfigs(null);
     for (Long hostId : hostIds) {
-      AgentConfigsUpdateEvent agentConfigsUpdateEvent = configHelper.getHostActualConfigs(hostId);
+      AgentConfigsUpdateEvent agentConfigsUpdateEvent = configHelper.getHostActualConfigs(hostId, clustersDesiredConfigs);
       updateData(agentConfigsUpdateEvent);
     }
   }
