@@ -1587,23 +1587,14 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
   public synchronized RequestStatusResponse updateClusters(Set<ClusterRequest> requests,
                                                            Map<String, String> requestProperties)
       throws AmbariException, AuthorizationException {
-    return updateClusters(requests, requestProperties, true);
+    return updateClusters(requests, requestProperties, true, true);
   }
 
   @Override
   @Transactional
   public synchronized RequestStatusResponse updateClusters(Set<ClusterRequest> requests,
                                                            Map<String, String> requestProperties,
-                                                           boolean fireAgentUpdates)
-      throws AmbariException, AuthorizationException {
-
-    return updateClusters(requests, requestProperties, true);
-  }
-
-  @Override
-  @Transactional
-  public synchronized RequestStatusResponse updateClusters(Set<ClusterRequest> requests,
-                                                           Map<String, String> requestProperties, boolean refreshCluster)
+                                                           boolean fireAgentUpdates, boolean refreshCluster)
       throws AmbariException, AuthorizationException {
 
     RequestStatusResponse response = null;
@@ -1611,7 +1602,7 @@ public class AmbariManagementControllerImpl implements AmbariManagementControlle
     // We have to allow for multiple requests to account for multiple
     // configuration updates (create multiple configuration resources)...
     for (ClusterRequest request : requests) {
-      response = updateCluster(request, requestProperties, fireAgentUpdates);
+      response = updateCluster(request, requestProperties, fireAgentUpdates, refreshCluster);
     }
     return response;
   }
