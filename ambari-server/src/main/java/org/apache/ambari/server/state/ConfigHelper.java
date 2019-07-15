@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.ambari.server.AmbariException;
 import org.apache.ambari.server.agent.stomp.AgentConfigsHolder;
@@ -58,7 +59,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +84,7 @@ public class ConfigHelper {
   public static final String CLUSTER_DEFAULT_TAG = "tag";
   private final boolean STALE_CONFIGS_CACHE_ENABLED;
   private final int STALE_CONFIGS_CACHE_EXPIRATION_TIME;
+  private static final String SLASH_UNICODE = String.format("\\u%04x", (int)'/');
 
   /**
    * Cache for storing stale config flags. Key for cache is hash of [actualConfigs, desiredConfigs, hostName, serviceName,
@@ -1523,11 +1524,13 @@ public class ConfigHelper {
     // get all current and previous host configs
     Map<Long, AgentConfigsUpdateEvent> currentConfigEvents = new HashMap<>();
     Map<Long, AgentConfigsUpdateEvent> previousConfigEvents = new HashMap<>();
+    Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs =
+        getClustersDesiredConfigs(clustersInUse.stream().map(c -> c.getClusterId()).collect(Collectors.toSet()));
     for (Cluster cluster : clustersInUse) {
       for (Host host : cluster.getHosts()) {
         Long hostId = host.getHostId();
         if (!currentConfigEvents.containsKey(hostId)) {
-          currentConfigEvents.put(host.getHostId(), m_agentConfigsHolder.get().getCurrentData(hostId));
+          currentConfigEvents.put(host.getHostId(), m_agentConfigsHolder.get().getCurrentData(hostId, clustersDesiredConfigs));
         }
         if (!previousConfigEvents.containsKey(host.getHostId())) {
           previousConfigEvents.put(host.getHostId(), m_agentConfigsHolder.get().getData(hostId));
@@ -2031,15 +2034,31 @@ public class ConfigHelper {
    * @throws AmbariException
    */
   public AgentConfigsUpdateEvent getHostActualConfigs(Long hostId) throws AmbariException {
-    return getHostActualConfigsExcludeCluster(hostId, null);
+    return getHostActualConfigs(hostId, null);
+  }
+
+  /**
+   * Collects actual configurations and configuration attributes for specified host.
+   * @param hostId host id to collect configurations and configuration attributes
+   * @return event ready to send to agent
+   * @throws AmbariException
+   */
+  public AgentConfigsUpdateEvent getHostActualConfigs(Long hostId, Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs) throws AmbariException {
+    return getHostActualConfigsExcludeCluster(hostId, null, clustersDesiredConfigs);
   }
 
   public AgentConfigsUpdateEvent getHostActualConfigsExcludeCluster(Long hostId, Long clusterId) throws AmbariException {
+    return getHostActualConfigsExcludeCluster(hostId, clusterId, null);
+  }
+
+  public AgentConfigsUpdateEvent getHostActualConfigsExcludeCluster(Long hostId, Long clusterId,
+                                                                    Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs) throws AmbariException {
     TreeMap<String, ClusterConfigs> clustersConfigs = new TreeMap<>();
 
     Host host = clusters.getHostById(hostId);
     for (Cluster cl : clusters.getClusters().values()) {
-      if (clusterId != null && cl.getClusterId() == clusterId) {
+      Long currentClusterId = cl.getClusterId();
+      if (clusterId != null && currentClusterId == clusterId) {
         continue;
       }
       Map<String, Map<String, String>> configurations = new HashMap<>();
@@ -2047,7 +2066,13 @@ public class ConfigHelper {
       if (LOG.isInfoEnabled()) {
         LOG.info("For configs update on host {} will be used cluster entity {}", hostId, cl.getClusterEntity().toString());
       }
-      Map<String, DesiredConfig> clusterDesiredConfigs = cl.getDesiredConfigs(false);
+      Map<String, DesiredConfig> clusterDesiredConfigs = new HashMap<>();
+      if (MapUtils.isNotEmpty(clustersDesiredConfigs)) {
+        clusterDesiredConfigs = clustersDesiredConfigs.get(currentClusterId);
+      }
+      if (clusterDesiredConfigs == null) {
+        clusterDesiredConfigs = cl.getDesiredConfigs(false);
+      }
       LOG.info("For configs update on host {} will be used following cluster desired configs {}", hostId,
           clusterDesiredConfigs.toString());
 
@@ -2063,7 +2088,7 @@ public class ConfigHelper {
       SortedMap<String, SortedMap<String, String>> configurationsTreeMap = sortConfigutations(configurations);
       SortedMap<String, SortedMap<String, SortedMap<String, String>>> configurationAttributesTreeMap =
           sortConfigurationAttributes(configurationAttributes);
-      clustersConfigs.put(Long.toString(cl.getClusterId()),
+      clustersConfigs.put(Long.toString(currentClusterId),
           new ClusterConfigs(configurationsTreeMap, configurationAttributesTreeMap));
     }
 
@@ -2071,12 +2096,41 @@ public class ConfigHelper {
     return agentConfigsUpdateEvent;
   }
 
+  public Map<Long, Map<String, DesiredConfig>> getClustersDesiredConfigs(Set<Long> clusterIds) {
+    Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs = new HashMap<>();
+    for (Cluster cl : clusters.getClusters().values()) {
+      Long currentClusterId = cl.getClusterId();
+      if (CollectionUtils.isNotEmpty(clusterIds) && !clusterIds.contains(currentClusterId)) {
+        continue;
+      }
+      clustersDesiredConfigs.put(currentClusterId, cl.getDesiredConfigs(false));
+    }
+    return clustersDesiredConfigs;
+  }
+
+  public Map<Long, Map<String, DesiredConfig>> getClustersDesiredConfigsExcludeCluster(Long clusterId) {
+    Map<Long, Map<String, DesiredConfig>> clustersDesiredConfigs = new HashMap<>();
+    for (Cluster cl : clusters.getClusters().values()) {
+      Long currentClusterId = cl.getClusterId();
+      if (clusterId != null && currentClusterId.equals(clusterId)) {
+        continue;
+      }
+      clustersDesiredConfigs.put(currentClusterId, cl.getDesiredConfigs(false));
+    }
+    return clustersDesiredConfigs;
+  }
+
   private Map<String, Map<String, String>> unescapeConfigNames(Map<String, Map<String, String>> configurations) {
     Map<String, Map<String, String>> unescapedConfigs = new HashMap<>();
     for (Entry<String, Map<String, String>> configTypeEntry : configurations.entrySet()) {
       Map<String, String> unescapedTypeConfigs = new HashMap<>();
       for (Entry<String, String> config : configTypeEntry.getValue().entrySet()) {
-        unescapedTypeConfigs.put(StringEscapeUtils.unescapeJava(config.getKey()), config.getValue());
+        // according to AMBARI-2027, AMBARI-23516 are allowed following symbols: 0-9, a-z, A-Z, -, *, ., /
+        // only / will be escaped as \u002f
+        String key = config.getKey();
+        if (key.contains(SLASH_UNICODE)) {
+          unescapedTypeConfigs.put(key.replace(SLASH_UNICODE, "/"), config.getValue());
+        }
       }
       unescapedConfigs.put(configTypeEntry.getKey(), unescapedTypeConfigs);
     }
