@@ -46,7 +46,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
@@ -125,7 +124,7 @@ public class ClusterGrouping extends Grouping {
      */
     @Override
     public String toString() {
-      return MoreObjects.toStringHelper(this).add("id", id).add("title",
+      return Objects.toStringHelper(this).add("id", id).add("title",
           title).omitNullValues().toString();
     }
 

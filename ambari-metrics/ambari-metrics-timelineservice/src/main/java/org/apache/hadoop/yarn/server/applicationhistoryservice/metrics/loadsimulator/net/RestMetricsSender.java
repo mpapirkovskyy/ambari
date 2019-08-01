@@ -57,7 +57,7 @@ public class RestMetricsSender implements MetricsSender {
   public String pushMetrics(String payload) {
     String responseString = "";
     UrlService svc = null;
-    Stopwatch timer = Stopwatch.createStarted();
+    Stopwatch timer = new Stopwatch().start();
 
     try {
       LOG.info("server: {}", collectorServiceAddress);

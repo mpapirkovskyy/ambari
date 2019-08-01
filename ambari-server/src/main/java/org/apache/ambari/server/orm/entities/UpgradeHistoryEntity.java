@@ -32,7 +32,6 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
@@ -223,7 +222,7 @@ public class UpgradeHistoryEntity {
    */
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
+    return Objects.toStringHelper(this)
         .add("id", id)
         .add("upgradeId", upgradeId)
         .add("serviceName", serviceName)

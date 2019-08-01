@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
@@ -113,7 +112,7 @@ public class TaskWrapper {
    */
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("service", service)
+    return Objects.toStringHelper(this).add("service", service)
         .add("component", component)
         .add("tasks", tasks)
         .add("hosts", hosts)

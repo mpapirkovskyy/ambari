@@ -125,7 +125,7 @@ public class StackDefinedPropertyProviderTest {
     MetricsRetrievalService metricsRetrievalService = injector.getInstance(
         MetricsRetrievalService.class);
 
-    metricsRetrievalService.startAsync();
+    metricsRetrievalService.start();
     metricsRetrievalService.setThreadPoolExecutor(new SynchronousThreadPoolExecutor());
 
     helper = injector.getInstance(OrmTestHelper.class);

@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 /**
@@ -109,7 +108,7 @@ public class HostOrderItem {
    */
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
+    return Objects.toStringHelper(this)
         .add("m_type", m_type)
         .add("m_hosts", m_hosts)
         .add("m_checks", m_checks)

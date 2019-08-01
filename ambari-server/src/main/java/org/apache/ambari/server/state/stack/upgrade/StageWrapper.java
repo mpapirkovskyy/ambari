@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.gson.Gson;
 
@@ -168,7 +167,7 @@ public class StageWrapper {
    */
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("type", type)
+    return Objects.toStringHelper(this).add("type", type)
         .add("text",text)
         .omitNullValues().toString();
   }
