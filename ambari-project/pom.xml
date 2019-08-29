@@ -7,6 +7,7 @@
     http://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing, software
+  Unless required by applicable law or agreed to in writing, software
   distributed under the License is distributed on an "AS IS" BASIS,
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
@@ -37,9 +38,9 @@
     <swagger.maven.plugin.version>3.1.4</swagger.maven.plugin.version>
     <slf4j.version>1.7.20</slf4j.version>
     <guice.version>4.1.0</guice.version>
-    <spring.version>4.3.18.RELEASE</spring.version>
-    <spring.security.version>4.2.7.RELEASE</spring.security.version>
-    <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
+    <spring.version>5.1.8.RELEASE</spring.version>
+    <spring.security.version>5.1.5.RELEASE</spring.security.version>
+    <fasterxml.jackson.version>2.9.8</fasterxml.jackson.version>
     <postgres.version>42.2.2</postgres.version>
     <forkCount>4</forkCount>
     <reuseForks>false</reuseForks>
@@ -230,7 +231,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>18.0</version>
+        <version>28.0-jre</version>
       </dependency>
       <dependency>
         <groupId>com.google.code.findbugs</groupId>
@@ -722,6 +723,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.20</version>
+        </plugin>
+        <plugin>
+          <groupId>org.vafer</groupId>
+          <artifactId>jdeb</artifactId>
+          <version>1.7</version>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -40,14 +40,14 @@
     <python.ver>python &gt;= 2.6</python.ver>
     <deb.python.ver>python (&gt;= 2.6)</deb.python.ver>
     <!--TODO change to HDP URL-->
-    <hbase.tar>http://dev.hortonworks.com.s3.amazonaws.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1634/tars/hbase/hbase-2.0.0.3.0.0.0-1634-bin.tar.gz</hbase.tar>
-    <hbase.folder>hbase-2.0.0.3.0.0.0-1634</hbase.folder>
-    <hadoop.tar>http://dev.hortonworks.com.s3.amazonaws.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1634/tars/hadoop/hadoop-3.1.0.3.0.0.0-1634.tar.gz</hadoop.tar>
-    <hadoop.folder>hadoop-3.1.0.3.0.0.0-1634</hadoop.folder>
+    <hbase.tar>https://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.1.4.0-315/tars/hbase/hbase-2.0.2.3.1.4.0-315-bin.tar.gz</hbase.tar>
+    <hbase.folder>hbase-2.0.2.3.1.4.0-315</hbase.folder>
+    <hadoop.tar>https://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.1.4.0-315/tars/hadoop/hadoop-3.1.1.3.1.4.0-315.tar.gz</hadoop.tar>
+    <hadoop.folder>hadoop-3.1.1.3.1.4.0-315</hadoop.folder>
     <grafana.folder>grafana-2.6.0</grafana.folder>
     <grafana.tar>https://grafanarel.s3.amazonaws.com/builds/grafana-2.6.0.linux-x64.tar.gz</grafana.tar>
-    <phoenix.tar>http://dev.hortonworks.com.s3.amazonaws.com/HDP/centos7/3.x/BUILDS/3.0.0.0-1634/tars/phoenix/phoenix-5.0.0.3.0.0.0-1634.tar.gz</phoenix.tar>
-    <phoenix.folder>phoenix-5.0.0.3.0.0.0-1634</phoenix.folder>
+    <phoenix.tar>https://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/3.x/BUILDS/3.1.4.0-315/tars/phoenix/phoenix-5.0.0.3.1.4.0-315.tar.gz</phoenix.tar>
+    <phoenix.folder>phoenix-5.0.0.3.1.4.0-315</phoenix.folder>
     <resmonitor.install.dir>/usr/lib/python2.6/site-packages/resource_monitoring</resmonitor.install.dir>
     <powermock.version>1.6.2</powermock.version>
     <distMgmtSnapshotsId>apache.snapshots.https</distMgmtSnapshotsId>
@@ -56,7 +56,7 @@
     <distMgmtStagingId>apache.staging.https</distMgmtStagingId>
     <distMgmtStagingName>Apache Release Distribution Repository</distMgmtStagingName>
     <distMgmtStagingUrl>https://repository.apache.org/service/local/staging/deploy/maven2</distMgmtStagingUrl>
-    <fasterxml.jackson.version>2.9.5</fasterxml.jackson.version>
+    <fasterxml.jackson.version>2.9.8</fasterxml.jackson.version>
   </properties>
   <distributionManagement>
     <repository>
@@ -74,7 +74,7 @@
     <repository>
       <id>apache-hadoop</id>
       <name>hdp</name>
-      <url>http://nexus-private.hortonworks.com/nexus/content/groups/public</url>
+      <url>https://repo.hortonworks.com/content/groups/public/</url>
     </repository>
     <repository>
       <id>apache-snapshots</id>
@@ -122,6 +122,11 @@
         <artifactId>powermock-module-junit4</artifactId>
         <version>${powermock.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>28.0-jre</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -261,7 +266,7 @@
       <plugin>
         <groupId>org.vafer</groupId>
         <artifactId>jdeb</artifactId>
-        <version>1.0.1</version>
+        <version>1.7</version>
         <executions>
           <execution>
             <!--Stub execution on direct plugin call - workaround for ambari deb build process-->

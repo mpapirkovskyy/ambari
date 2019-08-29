@@ -114,7 +114,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>19.0</version> <!-- required for checkstyle -->
     </dependency>
     <dependency>
       <groupId>org.easymock</groupId>
@@ -143,6 +142,7 @@
       <plugin>
         <groupId>org.vafer</groupId>
         <artifactId>jdeb</artifactId>
+        <version>1.7</version>
         <executions>
           <execution>
             <!--Stub execution on direct plugin call - workaround for ambari deb build process-->
