@@ -278,9 +278,8 @@
           </execution>
         </executions>
         <configuration>
-          <skip>true</skip>
-          <attach>false</attach>
-          <submodules>true</submodules>
+          <skip>false</skip>
+          <skipPOMs>false</skipPOMs>
           <controlDir>${project.basedir}/src/main/package/deb/control</controlDir>
         </configuration>
       </plugin>
