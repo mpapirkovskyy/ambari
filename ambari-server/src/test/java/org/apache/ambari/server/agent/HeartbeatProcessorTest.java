@@ -1074,7 +1074,7 @@ public class HeartbeatProcessorTest {
 
     ActionQueue aq = new ActionQueue();
 
-    HeartBeatHandler handler = new HeartBeatHandler(fsm, aq, am, injector);
+    HeartBeatHandler handler = new HeartBeatHandler(config, fsm, aq, am, injector);
     Register reg = new Register();
     HostInfo hi = new HostInfo();
     hi.setHostName(DummyHostname1);

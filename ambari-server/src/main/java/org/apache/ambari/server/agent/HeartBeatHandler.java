@@ -84,8 +84,6 @@ public class HeartBeatHandler {
   private final ActionManager actionManager;
   private HeartbeatMonitor heartbeatMonitor;
   private HeartbeatProcessor heartbeatProcessor;
-
-  @Inject
   private Configuration config;
 
   @Inject
@@ -111,12 +109,13 @@ public class HeartBeatHandler {
   private Map<String, HeartBeatResponse> hostResponses = new ConcurrentHashMap<>();
 
   @Inject
-  public HeartBeatHandler(Clusters fsm, ActionQueue aq, ActionManager am,
+  public HeartBeatHandler(Configuration c, Clusters fsm, ActionQueue aq, ActionManager am,
                           Injector injector) {
+    config = c;
     clusterFsm = fsm;
     actionQueue = aq;
     actionManager = am;
-    heartbeatMonitor = new HeartbeatMonitor(fsm, aq, am, 60000, injector);
+    heartbeatMonitor = new HeartbeatMonitor(fsm, aq, am, config.getHeartbeatMonitorInterval(), injector);
     heartbeatProcessor = new HeartbeatProcessor(fsm, am, heartbeatMonitor, injector); //TODO modify to match pattern
     injector.injectMembers(this);
   }

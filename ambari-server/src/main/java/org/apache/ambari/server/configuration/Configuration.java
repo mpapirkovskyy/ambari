@@ -338,6 +338,12 @@ public class Configuration {
    */
   public static final String SERVER_VERSION_KEY = "version";
 
+  @Markdown(
+    description = "Interval for heartbeat presence checks.",
+    examples = {"60000","600000"} )
+  public static final ConfigurationProperty<Integer> HEARTBEAT_MONITORING_INTERVAL = new ConfigurationProperty<>(
+    "heartbeat.monitoring.interval",60000);
+
   /**
    * The directory on the Ambari Server file system used for storing
    * Ambari Agent bootstrap information such as request responses.
@@ -3387,6 +3393,10 @@ public class Configuration {
 
   public String areHostsSysPrepped(){
     return getProperty(SYS_PREPPED_HOSTS);
+  }
+
+  public Integer getHeartbeatMonitorInterval() {
+    return Integer.parseInt(getProperty(HEARTBEAT_MONITORING_INTERVAL));
   }
 
   /**

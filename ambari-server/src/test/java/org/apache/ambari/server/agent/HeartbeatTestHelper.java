@@ -43,6 +43,7 @@ import org.apache.ambari.server.actionmanager.Request;
 import org.apache.ambari.server.actionmanager.Stage;
 import org.apache.ambari.server.actionmanager.StageFactory;
 import org.apache.ambari.server.api.services.AmbariMetaInfo;
+import org.apache.ambari.server.configuration.Configuration;
 import org.apache.ambari.server.orm.InMemoryDefaultTestModule;
 import org.apache.ambari.server.orm.OrmTestHelper;
 import org.apache.ambari.server.orm.dao.ClusterDAO;
@@ -77,6 +78,9 @@ public class HeartbeatTestHelper {
 
   @Inject
   Clusters clusters;
+
+  @Inject
+  Configuration configuration;
 
   @Inject
   Injector injector;
@@ -122,7 +126,7 @@ public class HeartbeatTestHelper {
 
   public HeartBeatHandler getHeartBeatHandler(ActionManager am, ActionQueue aq)
       throws InvalidStateTransitionException, AmbariException {
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aq, am, injector);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aq, am, injector);
     Register reg = new Register();
     HostInfo hi = new HostInfo();
     hi.setHostName(DummyHostname1);

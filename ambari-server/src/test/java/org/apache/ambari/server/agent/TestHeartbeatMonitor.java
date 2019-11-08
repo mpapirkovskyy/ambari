@@ -26,6 +26,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -119,8 +120,10 @@ public class TestHeartbeatMonitor {
     fsm.addHost(hostname);
     ActionQueue aq = new ActionQueue();
     ActionManager am = mock(ActionManager.class);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(10);
     HeartbeatMonitor hm = new HeartbeatMonitor(fsm, aq, am, 10, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(fsm, aq, am, injector);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, fsm, aq, am, injector);
     Register reg = new Register();
     reg.setHostname(hostname);
     reg.setResponseId(12);
@@ -189,7 +192,9 @@ public class TestHeartbeatMonitor {
     ActionManager am = mock(ActionManager.class);
     HeartbeatMonitor hm = new HeartbeatMonitor(clusters, aq, am,
       heartbeatMonitorWakeupIntervalMS, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aq, am, injector);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(60000);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aq, am, injector);
     Register reg = new Register();
     reg.setHostname(hostname1);
     reg.setResponseId(12);
@@ -307,7 +312,9 @@ public class TestHeartbeatMonitor {
     ActionManager am = mock(ActionManager.class);
     HeartbeatMonitor hm = new HeartbeatMonitor(clusters, aq, am,
       heartbeatMonitorWakeupIntervalMS, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aq, am, injector);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(60000);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aq, am, injector);
     Register reg = new Register();
     reg.setHostname(hostname1);
     reg.setResponseId(12);
@@ -401,8 +408,10 @@ public class TestHeartbeatMonitor {
     ActionManager am = mock(ActionManager.class);
     HeartbeatMonitor hm = new HeartbeatMonitor(clusters, aqMock, am,
       heartbeatMonitorWakeupIntervalMS, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aqMock, am,
-        injector);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(60000);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aqMock,
+                                                      am, injector);
     Register reg = new Register();
     reg.setHostname(hostname1);
     reg.setResponseId(12);
@@ -476,7 +485,9 @@ public class TestHeartbeatMonitor {
     ActionQueue aq = new ActionQueue();
     ActionManager am = mock(ActionManager.class);
     HeartbeatMonitor hm = new HeartbeatMonitor(clusters, aq, am, 10, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aq, am, injector);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(10);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aq, am, injector);
 
     Register reg = new Register();
     reg.setHostname(hostname1);
@@ -598,7 +609,9 @@ public class TestHeartbeatMonitor {
     ActionManager am = mock(ActionManager.class);
     HeartbeatMonitor hm = new HeartbeatMonitor(clusters, aq, am,
       heartbeatMonitorWakeupIntervalMS, injector);
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, aq, am, injector);
+    Configuration configuration = mock(Configuration.class);
+    when(configuration.getHeartbeatMonitorInterval()).thenReturn(60000);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, aq, am, injector);
     Register reg = new Register();
     reg.setHostname(hostname1);
     reg.setResponseId(12);

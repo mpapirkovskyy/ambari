@@ -37,6 +37,7 @@ import org.apache.ambari.server.agent.AgentEnv;
 import org.apache.ambari.server.agent.DiskInfo;
 import org.apache.ambari.server.agent.HeartBeatHandler;
 import org.apache.ambari.server.agent.HostInfo;
+import org.apache.ambari.server.configuration.Configuration;
 import org.apache.ambari.server.orm.GuiceJpaInitializer;
 import org.apache.ambari.server.orm.InMemoryDefaultTestModule;
 import org.apache.ambari.server.orm.OrmTestHelper;
@@ -126,8 +127,9 @@ public class HostTest {
     ActionQueue queue = mock(ActionQueue.class);
     ActionManager manager = mock(ActionManager.class);
     Injector injector = mock(Injector.class);
+    Configuration configuration = mock(Configuration.class);
     doNothing().when(injector).injectMembers(any());
-    HeartBeatHandler handler = new HeartBeatHandler(clusters, queue, manager, injector);
+    HeartBeatHandler handler = new HeartBeatHandler(configuration, clusters, queue, manager, injector);
     String os = handler.getOsType("RedHat", "6.1");
     Assert.assertEquals("redhat6", os);
     os = handler.getOsType("RedHat", "6");
